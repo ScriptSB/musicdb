@@ -19,18 +19,6 @@ CREATE TABLE  artist (
   type CHAR(45) NULL,
   gender CHAR(45) NULL,
   PRIMARY KEY (arID));
-
---ENTITY track
-CREATE TABLE  track (
-  TID INTEGER,
-  position INTEGER,
-  recording_RID INT NOT NULL,
-  artist_ID INT NOT NULL,
-  artist_area_AID INT NOT NULL,
-  artist_genre_GID INT NOT NULL,
-  media_MID INT NOT NULL,
-  media_release_REID INT NOT NULL,
-  PRIMARY KEY (TID));
   
 --ENTITY recording
 CREATE TABLE  recording (
@@ -45,12 +33,23 @@ CREATE TABLE  release (
   Relname CHAR(45),
   PRIMARY KEY (REID));
 
---ENTITY media
-CREATE TABLE  media (
+--ENTITY medium
+CREATE TABLE  medium (
   MID INTEGER,
   Mformat CHAR(45),
   release_REID INTEGER,
   PRIMARY KEY (MID));
+
+--relationship track
+CREATE TABLE  track (
+  TID INTEGER,
+  position INTEGER,
+  MID INTEGER,
+  REID INTEGER,
+  PRIMARY KEY (TID),
+  UNIQUE(MID, REID),
+  FOREIGN KEY (MID) from medium,
+  FOREIGN KEY (REID) from release);
     
 --RELATIONSHIP artist-area
 CREATE TABLE artist_area (
@@ -68,8 +67,8 @@ CREATE TABLE artist_genre (
   FOREIGN KEY (arID) REFERENCES artist,
   FOREIGN KEY (GID) REFERENCES genre);
     
---RELATIONSHIP media_recording
-CREATE TABLE media_recording(
+--RELATIONSHIP using
+CREATE TABLE using(
   MID INTEGER,
   REID INTEGER,
   PRIMARY KEY (MID, REID),
@@ -77,17 +76,10 @@ CREATE TABLE media_recording(
   FOREIGN KEY (REID) REFERENCES recording);
   
 --RELATIONSHIP artist_track
-CREATE TABLE artist_track(
+CREATE TABLE participate(
   arID INTEGER NOT NULL,
   TID INTEGER NOT NULL,
   PRIMARY KEY (arID, TID),
   FOREIGN KEY (arID) REFERENCES artist,
   FOREIGN KEY (TID) REFERENCES track);
 
---RELATIONSHIP trackR
-CREATE TABLE trackR(
-  TID INTEGER, RID INTEGER, MID INTEGER,
-  PRIMARY KEY (TID, RID, MID),
-  FOREIGN KEY (RID) REFERENCES recording,
-  FOREIGN KEY (TID) REFERENCES track,
-  FOREIGN KEY (MID) REFERENCES media);

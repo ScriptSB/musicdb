@@ -65,12 +65,9 @@
 \section{The ER model}
 In the given project data, we firstly recognize 'area', 'artist' and 'genre' each as three individual entities \textbf{Each artist is from at most one area, so it's a many-to-one relation.} Several artists can belong to different genres and one genre can contain several artists. So \textbf{the relation between 'artist' and 'genre' is many-to-many. }\\ \\
 Secondly, we  think about the relationship among 'release','recording',track' and 'medium'. We imagine a scene to describe these relations. The csv file of 'release' contains the names of releases. They could be stored in the mediums, such as CD, 12'' Vinyl and so on. What's more, one release could have several CDs to contain many tracks, or in different medium (I'm not sure about this, but possible).  So \textbf{the relation between 'release' and 'medium' is one-to-many.} Next, each track in different mediums must correspond to one recording. So \textbf{the relation between 'track' and 'recording' is many-to-one.}  \textbf{Each 'track' must be in one of  'medium's. So the relation is many-to-one.} In addition, let's review the character of 'medium'. It could be \textbf{a relation between 'release' and 'track'}. Because the one release contains tracks by medium. \\ \\
-
-Finally, \textbf{the relation between 'artist' and 'track' is many-to-many}. Because many artists could participate together in one track. And many tracks(recordings) could be performed by the same artist.\\
-
-
-We draw our ER model as below:
-\\
+Finally, \textbf{the relation between 'artist' and 'track' is many-to-many}. Because many artists could participate together in one track. And many tracks(recordings) could be performed by the same artist.\\ \\
+We draw our ER model as below:\\
+\includegraphics[width=13cm]{ermodel}
 \\
 
 \section{SQL commands}
@@ -99,18 +96,6 @@ CREATE TABLE  artist (
   type CHAR(45) NULL,
   gender CHAR(45) NULL,
   PRIMARY KEY (arID));
-
---ENTITY track
-CREATE TABLE  track (
-  TID INTEGER,
-  position INTEGER,
-  recording_RID INT NOT NULL,
-  artist_ID INT NOT NULL,
-  artist_area_AID INT NOT NULL,
-  artist_genre_GID INT NOT NULL,
-  media_MID INT NOT NULL,
-  media_release_REID INT NOT NULL,
-  PRIMARY KEY (TID));
   
 --ENTITY recording
 CREATE TABLE  recording (
@@ -125,12 +110,23 @@ CREATE TABLE  release (
   Relname CHAR(45),
   PRIMARY KEY (REID));
 
---ENTITY media
-CREATE TABLE  media (
+--ENTITY medium
+CREATE TABLE  medium (
   MID INTEGER,
   Mformat CHAR(45),
   release_REID INTEGER,
   PRIMARY KEY (MID));
+
+--relationship track
+CREATE TABLE  track (
+  TID INTEGER,
+  position INTEGER,
+  MID INTEGER,
+  REID INTEGER,
+  PRIMARY KEY (TID),
+  UNIQUE(MID, REID),
+  FOREIGN KEY (MID) from medium,
+  FOREIGN KEY (REID) from release);
     
 --RELATIONSHIP artist-area
 CREATE TABLE artist_area (
@@ -148,8 +144,8 @@ CREATE TABLE artist_genre (
   FOREIGN KEY (arID) REFERENCES artist,
   FOREIGN KEY (GID) REFERENCES genre);
     
---RELATIONSHIP media_recording
-CREATE TABLE media_recording(
+--RELATIONSHIP using
+CREATE TABLE using(
   MID INTEGER,
   REID INTEGER,
   PRIMARY KEY (MID, REID),
@@ -157,20 +153,12 @@ CREATE TABLE media_recording(
   FOREIGN KEY (REID) REFERENCES recording);
   
 --RELATIONSHIP artist_track
-CREATE TABLE artist_track(
+CREATE TABLE participate(
   arID INTEGER NOT NULL,
   TID INTEGER NOT NULL,
   PRIMARY KEY (arID, TID),
   FOREIGN KEY (arID) REFERENCES artist,
   FOREIGN KEY (TID) REFERENCES track);
-
---RELATIONSHIP trackR
-CREATE TABLE trackR(
-  TID INTEGER, RID INTEGER, MID INTEGER,
-  PRIMARY KEY (TID, RID, MID),
-  FOREIGN KEY (RID) REFERENCES recording,
-  FOREIGN KEY (TID) REFERENCES track,
-  FOREIGN KEY (MID) REFERENCES media);
 \end{lstlisting}
 
 \end{document}
