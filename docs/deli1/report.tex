@@ -63,6 +63,11 @@
 \maketitle
 
 \section{The ER model}
+In the given project data, we firstly recognize 'area', 'artist' and 'genre' each as three individual entities \textbf{Each artist is from at most one area, so it's a many-to-one relation.} Several artists can belong to different genres and one genre can contain several artists. So \textbf{the relation between 'artist' and 'genre' is many-to-many. }\\ \\
+Secondly, we  think about the relationship among 'release','recording',track' and 'medium'. We imagine a scene to describe these relations. The csv file of 'release' contains the names of releases. They could be stored in the mediums, such as CD, 12'' Vinyl and so on. What's more, one release could have several CDs to contain many tracks, or in different medium (I'm not sure about this, but possible).  So \textbf{the relation between 'release' and 'medium' is one-to-many.} Next, each track in different mediums must correspond to one recording. So \textbf{the relation between 'track' and 'recording' is many-to-one.}\\ \\
+Finally, \textbf{the relation between 'artist' and 'track' is many-to-many}. Because many artists could participate together in one track. And many tracks(recordings) could be performed by the same artist.\\
+
+
 We draw our ER model as below:
 \\
 \\
