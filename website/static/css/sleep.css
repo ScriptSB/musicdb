@@ -1,0 +1,47 @@
+body {
+    font-size: 15px;
+}
+
+.left {
+    text-align: left
+}
+
+.bs-callout {
+    margin: 20px 0;
+    padding: 20px;
+    border-left: 3px solid #eee;
+    border-color: #f0ad4e;
+    text-align: left;
+}
+
+#result {
+    margin-top: 20px;
+}
+
+.option {
+    margin: 5px;
+}
+
+.mastfoot {
+    font-size: 14px;
+}
+
+.dl-horizontal {
+    margin: 20px 0;
+}
+
+#count {
+    text-align:right;
+}
+
+dd {
+    text-align: left;
+    margin-bottom: 5px;
+}
+
+.fb-share-button {
+    margin-top: 10px;
+    margin-right: 10px;
+    display: block;
+    float: right;
+}
