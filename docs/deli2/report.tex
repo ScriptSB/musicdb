@@ -1,0 +1,249 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+%%% END Article customizations
+
+\title{Project Report}
+\author{Group 18: Chengzhen Wu, Huiqi Mao, Ruofan Zhou}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\begin{document}
+\maketitle
+
+\section{ER model}
+After reading the feedback of diverable1, we modified our ER model as below:\\ \\
+\includegraphics[width=14cm]{ERmodel}\\ \\
+In the given project data, we firstly recognize 'area', 'artist' and 'genre' each as three individual entities. Each artist is from at most one area, so it's a many-to-one relation. Several artists can belong to different genres and one genre can contain several artists. So the relation between 'artist' and 'genre' is many-to-many.\\ \\
+Secondly, we think about the relationship among 'release', 'recording', track' and 'medium'. We imagine a scene to describe these relations. The csv file of 'release' contains the names of releases. They could be stored in the mediums, such as CD, 12” Vinyl and so on. What's more, one release could have several CDs to contain many tracks, or in different medium (I'm not sure about this, but possible). So the relation between 'release' and 'medium' is one-to-many. Next, each track in different mediums must correspond to one recording. So the relation between 'track' and 'recording' is many-to-one. Each 'track' must be in one of 'medium's. So the relation is many-to-one.\\ \\
+Finally, we merge one-to-may relations. 'release' and 'medium' are merged into 'Release\_medium'.  'area' can be merged into 'artist' as attributes. The 'has' relation between 'Release\_medium' and 'track' is merged into 'track' using 'mid' as foreign key. So is the 'copy' relation between 'recording' and 'track' using 'id' of recording as foreign key.\\ \\
+Additionally, we ignore the 'count' in 'genre', which could be created as view in the database.\\ \\
+
+\tiny{
+\section{SQL based on ER model}
+\begin{lstlisting}[language=SQL, keywordstyle=\color{blue!70},
+commentstyle=\color{red!50!green!50!blue!50},
+rulesepcolor=\color{red!20!green!20!blue!20},
+frame=shadowbox]
+--ENTITY Genre
+--we don't need gcount in genre
+CREATE TABLE  Genre (
+  GID INTEGER,
+  Gname VARCHAR(100),
+  PRIMARY KEY (GID)
+  );
+
+--ENTITY Artist
+CREATE TABLE  Artist (
+  AID INTEGER,
+  Aname VARCHAR(100),
+  Atype CHAR(6),
+  gender CHAR(6),
+  area_name VARCHAR(60),
+  area_type CHAR(15)
+  PRIMARY KEY (AID)
+  );
+  
+--ENTITY Recording
+CREATE TABLE  recording (
+  RID INTEGER,
+  Rname VARCHAR(100),
+  Rlength INTEGER,
+  PRIMARY KEY (RID)
+  );
+
+--ENTITY RelaseMedium
+CREATE TABLE  ReleaseMedium (
+  MID INTEGER,
+  RID INTEGER,
+  name VARCHAR(400),
+  format CHAR(45),
+  PRIMARY KEY (RID,MID)
+  );
+
+--ENTITY Track
+CREATE TABLE  Track (
+  TID INTEGER,
+  position INTEGER,
+  MID INTEGER NOT NULL,
+  RID INTEGER NOT NULL,
+  REID INTEGER NOT NULL,
+  PRIMARY KEY (TID),
+  FOREIGN KEY (RID,MID) REFERENCES ReleaseMediuma ON DELETE NO ACTION,
+  FOREIGN KEY (REID) REFERENCES Recording ON DELETE NO ACTION
+  );
+    
+--RELATIONSHIP artist_genre
+CREATE TABLE artist_genre (
+  AID INTEGER NOT NULL,
+  GID INTEGER NOT NULL,
+  PRIMARY KEY (AID, GID),
+  FOREIGN KEY (AID) REFERENCES Artist ON DELETE NO ACTION ,
+  FOREIGN KEY (GID) REFERENCES Genre ON DELETE NO ACTION
+  );
+    
+--RELATIONSHIP artist_track
+CREATE TABLE artist_track(
+  AID INTEGER NOT NULL,
+  TID INTEGER NOT NULL,
+  PRIMARY KEY (AID, TID),
+  FOREIGN KEY (AID) REFERENCES Artist ON DELETE NO ACTION ,
+  FOREIGN KEY (TID) REFERENCES Track ON DELETE NO ACTION 
+  );
+\end{lstlisting}}
+
+\section{Alternative based on Real Data}
+\normalsize{
+When importing the real data, we find several problems. So we decide to change the schema in order to import as much data as possible. \\ \\
+In our ER model, we merged the 'area' and 'artist'. However, since the data is not incomplete, a few AreaIDs in 'artist' don't appear in 'area', such as 'AreaID=241'. So we use an 'area' entity instead. And the foreign key in 'artist' is disabled. Other foreign key constraints, except in 'medium', are also disabled to make it easy to import data. Additionally, in the original file of 'artist.csv', we change '\\N' to '0', which is null in the 'area' table.\\ \\
+Another problem with the data is deplicate, since the data in artist\_track has duplicate, we set the foreign-key disabled in the table artist\_track.\\ \\
+We separate the release\_medium table into 'release' and 'medium', considering the limited space. Because the name of release could be very long. Duplication could  cause a waste of memory. But the foreign key in 'medium' is still retained, because it works.\\ \\
+In the 'genre' entity, 'count' is remained for further possible queries(We find that 'count' from real data is not really the count we caculate).\\ \\}
+\section{Alternative SQL}
+\tiny{
+\begin{lstlisting}[language=SQL, keywordstyle=\color{blue!70},
+commentstyle=\color{red!50!green!50!blue!50},
+rulesepcolor=\color{red!20!green!20!blue!20},
+frame=shadowbox]
+CREATE TABLE  Init_Genre (
+  GID VARCHAR(20),
+  Gname VARCHAR(300),
+  count Integer,
+  PRIMARY KEY (GID)
+  );
+
+create table Init_Area(
+  AreaID VARCHAR(20),
+  AreaName VARCHAR(150),
+  Area_type VARCHAR(15),
+  PRIMARY KEY (AreaID)
+  );
+  
+CREATE TABLE  Init_Artist (
+  AID VARCHAR(20),
+  Aname VARCHAR(200),
+  Atype CHAR(10),
+  gender CHAR(6),
+  --area_name VARCHAR(100),
+  --area_type CHAR(15),
+  AreaID VARCHAR(20),
+  PRIMARY KEY (AID),
+  foreign key (AreaID) references Init_area(AreaID)
+  );
+  
+CREATE TABLE Init_Recording (
+  RID VARCHAR(20),
+  Rname VARCHAR(2000),
+  Rlength VARCHAR(20),
+  PRIMARY KEY (RID)
+  );
+
+
+CREATE TABLE Init_Release (
+  RID VARCHAR(20),
+  name VARCHAR(1000),
+  PRIMARY KEY (RID)
+  );
+
+CREATE TABLE Init_Medium (
+  MID VARCHAR(20),
+  RID VARCHAR(20),
+  format CHAR(45),
+  PRIMARY KEY (MID),
+  FOREIGN KEY (RID) REFERENCES Init_Release(RID)
+  );
+
+
+CREATE TABLE  Init_Track (
+  TID VARCHAR(20),
+  REID VARCHAR(20) NOT NULL,
+  MID VARCHAR(20) NOT NULL,
+  position INTEGER,
+  PRIMARY KEY (TID),
+  FOREIGN KEY (MID) REFERENCES Init_Medium(MID),
+  FOREIGN KEY (REID) REFERENCES Init_Recording(RID)
+  );
+
+CREATE TABLE Init_artist_genre (
+  AID VARCHAR(20) NOT NULL,
+  GID VARCHAR(20) NOT NULL,
+  PRIMARY KEY (AID, GID),
+  FOREIGN KEY (AID) REFERENCES Init_Artist(AID) ON DELETE CASCADE,
+  FOREIGN KEY (GID) REFERENCES Init_Genre(GID) ON DELETE CASCADE
+  );
+
+CREATE TABLE Init_artist_track(
+  AID VARCHAR(20) NOT NULL,
+  TID VARCHAR(20) NOT NULL,
+  PRIMARY KEY (AID, TID),
+  FOREIGN KEY (AID) REFERENCES Init_Artist(AID), --these foreign keys are disabled for data duplicate
+  FOREIGN KEY (TID) REFERENCES Init_Track(TID)
+  );
+\end{lstlisting}}
+
+\normalsize{
+\section{Queries}
+We finished the queries based on our model: \\ \\
+A. \\ \\
+B. \\ \\
+C. \\ \\
+D. \\ \\
+E. \\ \\
+F. \\ \\
+G.\\ \\
+
+\section{Interface}
+}
+
+\end{document}
