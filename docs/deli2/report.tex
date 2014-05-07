@@ -248,24 +248,46 @@ B
 commentstyle=\color{red!50!green!50!blue!50},
 rulesepcolor=\color{red!20!green!20!blue!20},
 frame=shadowbox]
-select area.areaname
-from INIT_AREA area
-where area.AREAID in (select art.areaid
-                      from INIT_ARTIST art
-                      where art.GENDER = 'Male' and art.ATYPE = 'Person' and art.AREAID <> 0
-                      GROUP BY art.AREAID 
-                      having count(*)>= all (select count(*)
-                                             from INIT_ARTIST art1
-                                             where art1.GENDER = 'Male'
-					and art1.ATYPE = 'Person'
-					and art.AREAID <> 0
-                                            group by art1.AREAID));
-             
-select count(*)
-	from INIT_ARTIST art
-	where art.ATYPE='Person'
-	and art.GENDER ='Female'
-	and art.areaid = '222' --United States
+create view area_male as
+select area.AREAID,area.areaname,count(*)as sum
+from INIT_Area area, INIT_ARTIST artist
+where artist.AREAID = area.AREAID and area.AREAID<>'0' and artist.GENDER='Male'
+GROUP BY area.areaID, area.Areaname
+order by count(*) desc;
+
+create view area_female as
+select area.AREAID,area.areaname,count(*)as sum
+from INIT_Area area, INIT_ARTIST artist
+where artist.AREAID = area.AREAID and area.AREAID<>'0'
+and artist.GENDER='Female'
+GROUP BY area.areaID, area.areaname
+order by count(*) desc;
+
+create view area_group as
+select area.AREAID,area.areaname,count(*)as sum
+from INIT_Area area, INIT_ARTIST artist
+where artist.AREAID = area.AREAID
+and area.AREAID<>'0'
+and artist.atype='Group'
+GROUP BY area.areaID, area.areaname
+order by count(*) desc;
+
+select area_male.areaname,area_male.sum as MALE,
+area_female.sum as FEMALE,area_group.sum as GROU
+from AREA_MALE,AREA_GROUP,AREA_FEMALE
+where (AREA_FEMALE.AREAname=AREA_MALE.AREAname and AREA_FEMALE.AREAname=AREA_Group.AREAname and AREA_FEMALE.AREANAME=(select area_female.areaname
+	from area_female
+	where ROWNUM=1))or 
+	(AREA_MALE.AREAname=AREA_FEMALE.AREAname
+	and AREA_MALE.AREAname=AREA_Group.AREAname
+	and AREA_MALE.AREANAME=(select area_male.areaname
+	from area_male
+	where ROWNUM=1))or
+	(AREA_GROUP.AREAname=AREA_MALE.AREAname
+	and AREA_FEMALE.AREAname=AREA_Group.AREAname
+	and AREA_GROUP.AREANAME=(select area_group.areaname
+	from area_group
+	where ROWNUM=1));   
 \end{lstlisting}
 C
 \begin{lstlisting}[language=SQL, keywordstyle=\color{blue!70},
