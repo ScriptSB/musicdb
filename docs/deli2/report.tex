@@ -272,19 +272,13 @@ C
 commentstyle=\color{red!50!green!50!blue!50},
 rulesepcolor=\color{red!20!green!20!blue!20},
 frame=shadowbox]
-select *
-from (select distinct art.aname
-      from (select rec1.RID
-            from init_recording rec1, init_track track1
-            where rec1.RID = track1.REID 
-      group by rec1.RID
-      order by count(*) desc) recorded, init_recording rec,
-	init_track track, init_artist art, init_artist_track art_track
-      where recorded.RID = rec.RID
-	and art.AID = art_track.AID
-	and art_track.TID = track.TID 
-	and rec.RID = track.REID and art.atype = 'Group')
-      where rownum<=10;
+select artist.aname
+from(
+select artist.ANAME,count(*)
+	from init_artist artist,init_artist_track A_T
+	where artist.atype='Group' and A_T.aid=artist.aid
+	group by artist.aname order by count(*) desc) artist
+	where Rownum<11;
 \end{lstlisting}
 D
 \begin{lstlisting}[language=SQL, keywordstyle=\color{blue!70},
