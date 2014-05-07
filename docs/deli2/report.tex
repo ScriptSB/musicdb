@@ -235,15 +235,138 @@ CREATE TABLE Init_artist_track(
 \normalsize{
 \section{Queries}
 We finished the queries based on our model: \\ \\
-A. \\ \\
-B. \\ \\
-C. \\ \\
-D. \\ \\
-E. \\ \\
-F. \\ \\
-G.\\ \\
+A
+\begin{lstlisting}[language=SQL, keywordstyle=\color{blue!70},
+commentstyle=\color{red!50!green!50!blue!50},
+rulesepcolor=\color{red!20!green!20!blue!20},
+frame=shadowbox]
+select artist.ANAME from init_area area, init_artist artist
+			where area.areaname='Switzerland';
+\end{lstlisting}
+B
+\begin{lstlisting}[language=SQL, keywordstyle=\color{blue!70},
+commentstyle=\color{red!50!green!50!blue!50},
+rulesepcolor=\color{red!20!green!20!blue!20},
+frame=shadowbox]
+select area.areaname
+from INIT_AREA area
+where area.AREAID in (select art.areaid
+                      from INIT_ARTIST art
+                      where art.GENDER = 'Male' and art.ATYPE = 'Person' and art.AREAID <> 0
+                      GROUP BY art.AREAID 
+                      having count(*)>= all (select count(*)
+                                             from INIT_ARTIST art1
+                                             where art1.GENDER = 'Male'
+					and art1.ATYPE = 'Person'
+					and art.AREAID <> 0
+                                            group by art1.AREAID));
+             
+select count(*)
+	from INIT_ARTIST art
+	where art.ATYPE='Person'
+	and art.GENDER ='Female'
+	and art.areaid = '222' --United States
+\end{lstlisting}
+C
+\begin{lstlisting}[language=SQL, keywordstyle=\color{blue!70},
+commentstyle=\color{red!50!green!50!blue!50},
+rulesepcolor=\color{red!20!green!20!blue!20},
+frame=shadowbox]
+select area.areaname
+select art.aname
+	from	(select rec1.RID
+		from init_recording rec1, init_track track1
+		where rec1.RID = track1.REID 
+		group by rec1.RID
+		order by count(*)desc)
+	recorded, init_recording rec, init_track track,
+	init_artist art, init_artist_track art_track
+	where recorded.RID = rec.RID
+		and art.AID = art_track.AID
+		and art_track.TID = track.TID 
+      		and rec.RID = track.REID
+		and art.atype = 'Group'
+		and rownum <=10;
+\end{lstlisting}
+D
+\begin{lstlisting}[language=SQL, keywordstyle=\color{blue!70},
+commentstyle=\color{red!50!green!50!blue!50},
+rulesepcolor=\color{red!20!green!20!blue!20},
+frame=shadowbox]
+select art.ANAME
+from (select art.aid
+      from INIT_ARTIST art 
+           join INIT_ARTIST_TRACK art_track
+		on art.AID = art_track.AID
+           join INIT_TRACK track on art_track.TID = track.TID
+           join INIT_MEDIUM medium on track.MID = medium.MID
+           join INIT_RELEASE release on medium.RID = release.RID
+      where art.atype = 'Group'
+      group by art.aid
+      order by count(*) desc) info, init_ARTIST art
+WHERE art.AID = info.AID and rownum <= 10
+ORDER BY rownum;
+\end{lstlisting}
+E
+\begin{lstlisting}[language=SQL, keywordstyle=\color{blue!70},
+commentstyle=\color{red!50!green!50!blue!50},
+rulesepcolor=\color{red!20!green!20!blue!20},
+frame=shadowbox]
+select art1.aname
+	from (select art.aid
+			from init_artist art, init_artist_genre
+				art_genre, init_genre genre
+			where art.aid = art_genre.aid
+			and art_genre.GID = genre.GID
+			and art.gender = 'Female' 
+		group by art.aid
+		order by count(*))
+	genreRank, init_artist art1
+	where  genreRank.aid = art1.aid and rownum = 1;
+\end{lstlisting}
+F
+\begin{lstlisting}[language=SQL, keywordstyle=\color{blue!70},
+commentstyle=\color{red!50!green!50!blue!50},
+rulesepcolor=\color{red!20!green!20!blue!20},
+frame=shadowbox]
+select area.areaname
+	from INIT_AREA area
+	where area.area_type='City' and (select count(*)
+		from INIT_ARTIST artist
+		where artist.AREAID = area.areaID
+		and artist.GENDER='Male')<(select count(*)
+		from INIT_ARTIST artist,INIT_AREA area
+		where artist.AREAID = area.areaID and artist.GENDER='Female');
+\end{lstlisting}
+G
+\begin{lstlisting}[language=SQL, keywordstyle=\color{blue!70},
+commentstyle=\color{red!50!green!50!blue!50},
+rulesepcolor=\color{red!20!green!20!blue!20},
+frame=shadowbox]
+create view med_track as
+	select medium.MID,count(*) as tracks
+		from INIT_Medium medium,INIT_TRACK track
+		where track.MID = medium.MID
+		group by medium.MID order by count(*) desc;
+
+select med_track.mid,med_track.tracks
+	from  med_track 
+	where med_track.tracks =(
+  		select MAX(med_track.tracks)
+  			from  med_track);
+\end{lstlisting}
+
 
 \section{Interface}
+Since we've already upload the data to the server, it's convient for us to use PHP + Apache + Oracle to build the website as interface, like below:\\ \\
+\includegraphics[width=14cm]{interface1}\\ \\
+It's the index of our website. The website contains 4 parts: Home, Data, Query and About, and the functionally page is Data and Query.\\ \\
+The screen shot of Data page is as below, the page shows the data of tables(you can select the table you want to see by clicking the link of table names, which are the yellow words on the uper part of the page). Each page would show 20 data and you can blowse more data by click the link of pages on the bottom part of the page. As the screen shot, it shows the 'artist' table. By moving your mouse onto those foreign keys, a prompt box showing the message of the table linked by the foreign key(as the screen shot, we move the mouse onto the 'areaid' and a box showing message of the name and type of the 'areaid').\\ \\
+\includegraphics[width=13cm]{interface2}\\ \\
+Under each row there's a input box, and you can use it to search for keyword. Just by clicking the "Keyword Search" you can filter the data of the table. For example, next screen shot shows the result as we input 'Person' under keyword 'atype' and 'male' under keyword 'gender'. \\ \\
+\includegraphics[width=13cm]{interface3}\\ \\
+And we satisfied all the queries in the Query page, and you can see the results by clicking the query number.\\ \\
+\includegraphics[width=13cm]{interface4}\\ \\
 }
 
 \end{document}
