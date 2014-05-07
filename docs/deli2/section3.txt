@@ -1,0 +1,7 @@
+Alternative based on real data
+When importing the real data, we find several problems. So we decide to change the schema in order to import as much data as possible. 
+In our ER model, we merged the ‘area’ and ‘artist’. However, a few AreaIDs in ‘artist’ don’t appear in ‘area’, such as ‘AreaID=241’. So we use an ‘area’ entity instead. And the foreign key in ‘artist’ is disabled. Other foreign key constraints, except in ‘medium’, are also disabled to make it easy to import data. Additionally, in the original file of ’artist.csv’, we change ‘\N’ to ‘0’, which is null in the ‘area’ table.
+We separate the release_medium table into ‘release’ and ‘medium’, considering the limited space. Because the name of release could be very long. Duplication could  cause a waste of memory. But the foreign key in ‘medium’ is still retained, because it works.
+In the ’genre’ entity, ‘count’ is remained for further possible queries.
+
+
