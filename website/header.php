@@ -33,7 +33,7 @@
 <ul class="nav masthead-nav">
 <!-- li class="active" -->
 <li><a href="index.php">Home</a></li>
-<li><a href="datas.php">Data</a></li>
+<li><a href="datas_artist.php">Data</a></li>
 <li><a href="query.php">Query</a></li>
 <li><a href="about.php">About</a></li>
 </ul>

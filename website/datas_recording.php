@@ -50,13 +50,13 @@ function movtip(e){
 ?>
 <TABLE>
 <TR>
-<TD width = "70px "><a href="datas_artist.php"><h6 style="color:FFA500">artist</h6>
+<TD width = "70px "><a href="datas_artist.php"><h6 style="color:#F2F5A9">artist</h6>
 </td>
 <TD width = "70px "><a href="datas_genre.php"><h6 style="color:#F2F5A9">genre</h6>
 </td>
 <TD width = "70px "><a href="datas_track.php"><h6 style="color:#F2F5A9">track</h6>
 </td>
-<TD width = "70px "><a href="datas_recording.php"><h6 style="color:#F2F5A9">recording</h6>
+<TD width = "70px "><a href="datas_recording.php"><h6 style="color:FFA500">recording</h6>
 </td>
 <TD width = "70px "><a href="datas_relemedi.php"><h6 style="color:#F2F5A9">release_medium</h6>
 </td>
@@ -65,14 +65,7 @@ function movtip(e){
 
 <?php
     
-    //$keyword = 'u';
-    // get the keyword
-    //if (isset($_GET['keyword'])) {
-        // cast var as int
-    //    $keyword = (string) $_GET['keyword'];
-    //}
     $id = '';
-    // get the keyword
     if (isset($_GET['id'])) {
         // cast var as int
         $id = (string) $_GET['id'];
@@ -85,32 +78,11 @@ function movtip(e){
         $name = (string) $_GET['name'];
     }
     
-    $type = '';
+    $length = '';
     // get the keyword
-    if (isset($_GET['type'])) {
+    if (isset($_GET['length'])) {
         // cast var as int
-        $type = (string) $_GET['type'];
-    }
-    
-    $gender = '';
-    // get the keyword
-    if (isset($_GET['gender'])) {
-        // cast var as int
-        $gender = (string) $_GET['gender'];
-    }
-    
-    $areaname = '';
-    // get the keyword
-    if (isset($_GET['areaname'])) {
-        // cast var as int
-        $areaname = (string) $_GET['areaname'];
-    }
-    
-    $areatype = '';
-    // get the keyword
-    if (isset($_GET['areatype'])) {
-        // cast var as int
-        $areatype = (string) $_GET['areatype'];
+        $type = (string) $_GET['length'];
     }
     
     $ora_host = "icoracle.epfl.ch";
@@ -123,10 +95,7 @@ function movtip(e){
     (host=".$ora_host.")(port=".$ora_port."))
     (connect_data=(service_name=".$ora_sid.")))";
     $conn = oci_connect($ora_username, $ora_password,$ora_connstr,$charset);
-    $sql = "SELECT count(*) as COUNTNUM from (select ar.* FROM ( select * from artist where AREA_NAME like '%$areaname%' and NAME like '%$name%'and ID like '%$id%'and TYPE like '%$type%' and GENDER like '%$gender%' and AREA_TYPE like '%$areatype%') ar )";
-    if ($areaname == '') {
-        $sql = "SELECT count(*) as COUNTNUM from (select ar.* FROM ( select * from artist where NAME like '%$name%'and ID like '%$id%'and TYPE like '%$type%' and GENDER like '%$gender%') ar )";
-    }
+    $sql = "SELECT count(*) as COUNTNUM from (select ar.* FROM ( select * from recording where ID like '%$id%' and NAME like '%$name%'and LENGTH like '%$length%') ar )";
     $stmt = oci_parse($conn, $sql);
     
     oci_execute($stmt, OCI_DEFAULT);
@@ -159,23 +128,15 @@ function movtip(e){
     // the offset of the list, based on current page
     $offset = ($currentpage - 1) * $rowsperpage + 1;
     $num = $offset + $rowsperpage - 1;
-    $sql = "SELECT * from (select ar.*, rownum rm FROM ( select * from artist where AREA_NAME like '%$areaname%' and NAME like '%$name%'and ID like '%$id%'and TYPE like '%$type%' and GENDER like '%$gender%' and AREA_TYPE like '%$areatype%') ar ) where rm between $offset and $num";
-    if ($areaname == '') {
-        $sql = "SELECT * from (select ar.*, rownum rm FROM ( select * from artist where NAME like '%$name%'and ID like '%$id%'and TYPE like '%$type%' and GENDER like '%$gender%' ) ar ) where rm between $offset and $num";
-    }
-
+    $sql = "SELECT * from (select ar.*, rownum rm FROM  ( select * from recording where ID like '%$id%' and NAME like '%$name%'and LENGTH like '%$length%') ar ) where rm between $offset and $num";
     $stid = oci_parse($conn, $sql);
     oci_execute($stid, OCI_DEFAULT);
     ?>
 
 <TABLE>
 <TD width = "80px" style="color:#C0C0C0">ID
-<TD width = "120px "style="color:#C0C0C0">NAME
-<TD width = "80px "style="color:#C0C0C0">TYPE
-<TD width = "80px "style="color:#C0C0C0">GENDER
-<TD width = "100px "style="color:#C0C0C0">AREANAME
-<TD width = "100px "style="color:#C0C0C0">AREATYPE
-<TD width = "80px "style="color:#C0C0C0">GENRE
+<TD width = "300px "style="color:#C0C0C0">NAME
+<TD width = "80px "style="color:#C0C0C0">LENGTH
 <TD width = "80px "style="color:#C0C0C0">TRACK
 </TD>
 </TABLE>
@@ -185,56 +146,28 @@ function movtip(e){
     ?>
         <TABLE>
             <TD width = "80px "><?php echo oci_result($stid, 'ID'); ?>
-<TD width = "120px "><?php $namee = oci_result($stid, 'NAME');
-    if (mb_strlen($namee) <= 12) {
+            <TD width = "300px "><?php $namee = oci_result($stid, 'NAME');
+    if (mb_strlen($namee) <= 35) {
         echo $namee;
     }
     else {
-        echo substr($namee, 0, 10);
+        echo substr($namee, 0, 32);
         echo "...";
     }?>
-            <TD width = "80px "><?php echo oci_result($stid, 'TYPE'); ?>
-            <TD width = "80px "><?php echo oci_result($stid, 'GENDER'); ?>
-<TD width = "100px "><?php $namee = oci_result($stid, 'AREA_NAME');
-    if (mb_strlen($namee) <= 10) {
-        echo $namee;
-    }
-    else {
-        echo substr($namee, 0, 8);
-        echo "...";
-    }?>
-            <TD width = "100px "><?php echo oci_result($stid, 'AREA_TYPE'); ?>
-            <TD width = "80px "><a id="tip" href="#" onmousemove="movtip(event)">G
+            <TD width = "120px "><?php echo oci_result($stid, 'LENGTH'); ?>
+        <TD width = "80px "><a id="tip" href="#" onmousemove="movtip(event)">T
             <?php
                 $aaid = oci_result($stid, 'ID');
-                $sql1 = "SELECT genre.ID, genre.name FROM artist_genre, genre where artist_genre.AID like '$aaid' and genre.ID = artist_genre.GID";
+                $sql1 = "SELECT track.TID, track.POSITION FROM track where track.MID like '$aaid'";
                 $stid1 = oci_parse($conn, $sql1);
                 oci_execute($stid1, OCI_DEFAULT);
                 oci_fetch($stid1);
             ?>
 <span id="tip_info"><?php
     while (oci_fetch($stid1)) {
-        $out = oci_result($stid1, 'ID');
-        $out1 = oci_result($stid1, 'NAME');
-        echo $out1;echo "("; echo $out; echo")";
-    } ?></span></a>
-
-
-
-</TD>
-<TD width = "80px "><a id="tip" href="#" onmousemove="movtip(event)">T
-<?php
-    $aaid = oci_result($stid, 'ID');
-    $sql1 = "SELECT track.TID, track.POSITION FROM artist_track, track where artist_track.AID like '$aaid' and track.TID = artist_track.TID";
-    $stid1 = oci_parse($conn, $sql1);
-    oci_execute($stid1, OCI_DEFAULT);
-    oci_fetch($stid1);
-    ?>
-<span id="tip_info"><?php
-    while (oci_fetch($stid1)) {
         $out = oci_result($stid1, 'TID');
         $out1 = oci_result($stid1, 'POSITION');
-        echo $out;echo ":"; echo $out1; echo "\n";
+        echo $out;echo ":"; echo $out1;
     } ?></span></a>
 
 
@@ -247,16 +180,10 @@ function movtip(e){
 <TABLE>
 <TD width = "80px" style="color:#C0C0C0">
 <input type="text" name="id" class="kw" size="5" maxlength="100" style="color:#bbb"/>
-<TD width = "120px" style="color:#C0C0C0">
+<TD width = "300px" style="color:#C0C0C0">
 <input type="text" name="name" class="kw" size="7" maxlength="100" style="color:#bbb"/>
 <TD width = "80px" style="color:#C0C0C0">
-<input type="text" name="type" class="kw" size="3" maxlength="100" style="color:#bbb"/>
-<TD width = "80px" style="color:#C0C0C0">
-<input type="text" name="gender" class="kw" size="3" maxlength="100" style="color:#bbb"/>
-<TD width = "100px" style="color:#C0C0C0">
-<input type="text" name="areaname" class="kw" size="3" maxlength="100" style="color:#bbb"/>
-<TD width = "100px" style="color:#C0C0C0">
-<input type="text" name="areatype" class="kw" size="3" maxlength="100" style="color:#bbb"/>
+<input type="text" name="length" class="kw" size="5" maxlength="100" style="color:#bbb"/>
 </TABLE>
 <input name="submit" type="submit" class="sb" value="keyword search" style="color:#000"/>
 <br />
@@ -277,7 +204,7 @@ function movtip(e){
     // range of num links to show
     $range = 3;
     
-    $pere = "&id={$id}&name={$name}&type={$type}&gender={$gender}&areaname={$areaname}&areatype={$areatype}";
+    $pere = "&id={$id}&name={$name}&length={$length}";
     
     // if not on page 1, don't show back links
     if ($currentpage > 1) {

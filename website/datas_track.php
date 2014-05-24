@@ -1,3 +1,39 @@
+
+<style type="text/css">
+body {font:normal 12px Verdana}
+a#tip {position:relative;left:1px; font-weight:bold;}
+a#tip:link,a#tip:hover {text-decoration:none;display:block}
+a#tip span {display:none;text-decoration:none;}
+a#tip:visited {text-decoration:underline;}
+a#tip:hover #tip_info {display:block;background:#FFFFFF;padding:0px 50px;position:absolute;top:0px;left:2px;color:#000}
+a img{border:none}
+</style>
+<script>
+function movtip(e){
+    var ele,x,y;
+    if(e.target){
+        ele=e.target;
+        x=e.layerX;
+        y=e.layerY;
+    }
+    else{
+        ele=event.srcElement;
+        x=event.x;
+        y=event.y;
+    }
+    if(ele.tagName!="A"){
+        document.title=ele.tagName;
+        return;
+    }
+    ele=ele.getElementsByTagName("span")[0];
+    with(ele.style){
+        left=x+3+"px";
+        top=y+3+"px";
+    }
+}
+</script>
+
+
 <body>
 <div id="fb-root"></div>
 <div class="site-wrapper">
@@ -6,7 +42,7 @@
 
 <div class="cover-container">
 <?php
-    
+    error_reporting(0);
     session_start();
     require_once('header.php');
     //require_once('configure.php');
@@ -14,29 +50,20 @@
 ?>
 <TABLE>
 <TR>
-<TD width = "70px "><a href="datas.php"><h6 style="color:#FFA500">area</h6>
-</TD>
 <TD width = "70px "><a href="datas_artist.php"><h6 style="color:#F2F5A9">artist</h6>
-</td>
-<TD width = "70px "><a href="datas_argenre.php"><h6 style="color:#F2F5A9">art_genre</h6>
-</td>
-<TD width = "70px "><a href="datas_artrack.php"><h6 style="color:#F2F5A9">art_track</h6>
 </td>
 <TD width = "70px "><a href="datas_genre.php"><h6 style="color:#F2F5A9">genre</h6>
 </td>
-<TD width = "70px "><a href="datas_medium.php"><h6 style="color:#F2F5A9">medium</h6>
+<TD width = "70px "><a href="datas_track.php"><h6 style="color:FFA500">track</h6>
 </td>
 <TD width = "70px "><a href="datas_recording.php"><h6 style="color:#F2F5A9">recording</h6>
 </td>
-<TD width = "70px "><a href="datas_release.php"><h6 style="color:#F2F5A9">release</h6>
-</td>
-<TD width = "70px "><a href="datas_track.php"><h6 style="color:#F2F5A9">track</h6>
+<TD width = "70px "><a href="datas_relemedi.php"><h6 style="color:#F2F5A9">release_medium</h6>
 </td>
 </TR>
 </TABLE>
+
 <?php
-    
-    
     
     //$keyword = 'u';
     // get the keyword
@@ -44,25 +71,18 @@
         // cast var as int
     //    $keyword = (string) $_GET['keyword'];
     //}
-    $areaid = '';
+    $id = '';
     // get the keyword
-    if (isset($_GET['areaid'])) {
+    if (isset($_GET['id'])) {
         // cast var as int
-        $areaid = (string) $_GET['areaid'];
+        $id = (string) $_GET['id'];
     }
     
-    $areaname = '';
+    $position = '';
     // get the keyword
-    if (isset($_GET['areaname'])) {
+    if (isset($_GET['position'])) {
         // cast var as int
-        $areaname = (string) $_GET['areaname'];
-    }
-    
-    $areatype = '';
-    // get the keyword
-    if (isset($_GET['areatype'])) {
-        // cast var as int
-        $areatype = (string) $_GET['areatype'];
+        $position = (string) $_GET['position'];
     }
     
     $ora_host = "icoracle.epfl.ch";
@@ -75,9 +95,12 @@
     (host=".$ora_host.")(port=".$ora_port."))
     (connect_data=(service_name=".$ora_sid.")))";
     $conn = oci_connect($ora_username, $ora_password,$ora_connstr,$charset);
-    $stmt = oci_parse($conn, "Select count(*) as COUNTNUM from init_area");
+    $sql = "SELECT count(*) as COUNTNUM from (select ar.* FROM ( select * from track where TID like '%$id%' and POSITION like '%$position%') ar )";
+    $stmt = oci_parse($conn, $sql);
+    
     oci_execute($stmt, OCI_DEFAULT);
     oci_fetch($stmt);
+    
     $numrows = oci_result($stmt, 'COUNTNUM');
     //oci_fetch($r);
     $rowsperpage = 20;
@@ -103,18 +126,19 @@
     } // end if
     
     // the offset of the list, based on current page
-    $offset = ($currentpage - 1) * $rowsperpage;
-    $num = $offset + $rowsperpage;
-    $sql = "SELECT * FROM init_area where AREAID like '%$areaid%' and AREANAME like '%$areaname%' and AREA_TYPE like '%$areatype%' and rownum between {$offset} and {$num}";
+    $offset = ($currentpage - 1) * $rowsperpage + 1;
+    $num = $offset + $rowsperpage - 1;
+    $sql = "SELECT * from (select ar.*, rownum rm FROM ( select * from track where TID like '%$id%' and POSITION like '%$position%') ar ) where rm between $offset and $num";
+
     $stid = oci_parse($conn, $sql);
     oci_execute($stid, OCI_DEFAULT);
-    
     ?>
 
 <TABLE>
-<TD width = "200px" style="color:#C0C0C0">AREAID
-<TD width = "200px "style="color:#C0C0C0">AREANAME
-<TD width = "200px "style="color:#C0C0C0">AREA_TYPE
+<TD width = "200px" style="color:#C0C0C0">ID
+<TD width = "80px "style="color:#C0C0C0">POSITION
+<TD width = "120px "style="color:#C0C0C0">MEDIUM_ID
+<TD width = "120px "style="color:#C0C0C0">RECORDING_ID
 </TD>
 </TABLE>
 
@@ -122,24 +146,55 @@
     while (oci_fetch($stid)) {
     ?>
         <TABLE>
-            <TD width = "200px "><?php echo oci_result($stid, 'AREAID'); ?>
-            <TD width = "200px "><?php echo oci_result($stid, 'AREANAME'); ?>
-            <TD width = "200px "><?php echo oci_result($stid, 'AREA_TYPE'); ?>
-        </TD>
+            <TD width = "200px "><?php echo oci_result($stid, 'TID'); ?>
+            <TD width = "80px "><?php echo oci_result($stid, 'POSITION'); ?>
+            <TD width = "120px "><a id="tip" href="#" onmousemove="movtip(event)">
+            <?php
+                $aaid = oci_result($stid, 'MID');
+                echo $aaid;
+                $sql1 = "SELECT releasemedium.NAME, releasemedium.FORMAT FROM releasemedium where releasemedium.MID like '$aaid'";
+                $stid1 = oci_parse($conn, $sql1);
+                oci_execute($stid1, OCI_DEFAULT);
+                oci_fetch($stid1);
+            ?>
+<span id="tip_info"><?php
+    while (oci_fetch($stid1)) {
+        $out = oci_result($stid1, 'NAME');
+        $out1 = oci_result($stid1, 'FORMAT');
+        echo $out;echo "("; echo $out1; echo")";
+    } ?></span></a>
+
+
+
+</TD>
+<TD width = "120px "><a id="tip" href="#" onmousemove="movtip(event)">
+<?php
+    $aaid = oci_result($stid, 'RCID');
+    echo $aaid;
+    $sql1 = "SELECT recording.NAME, recording.LENGTH FROM recording where recording.ID like '$aaid'";
+    $stid1 = oci_parse($conn, $sql1);
+    oci_execute($stid1, OCI_DEFAULT);
+    oci_fetch($stid1);
+    ?>
+<span id="tip_info"><?php
+    while (oci_fetch($stid1)) {
+        $out = oci_result($stid1, 'NAME');
+        $out1 = oci_result($stid1, 'LENGTH');
+        echo $out;echo ":"; echo $out1; echo "\n";
+    } ?></span></a>
+
+
+
+</TD>
+
         </TABLE>
-    <?php
-    }
-        ?>
+<?PHP } ?>
 <form action="<?php $_SERVER['PHP_SELF']?>" method="get" name="search_form" target="_self" id="f">
 <TABLE>
 <TD width = "200px" style="color:#C0C0C0">
-<input type="text" name="areaid" class="kw" size="10" maxlength="100" style="color:#bbb"/>
-<TD width = "200px" style="color:#C0C0C0">
-<input type="text" name="areaname" class="kw" size="10" maxlength="100" style="color:#bbb"/>
-<TD width = "200px" style="color:#C0C0C0">
-<input type="text" name="areatype" class="kw" size="10" maxlength="100" style="color:#bbb"/>
-</TABLE>
-<input name="submit" type="submit" class="sb" value="keyword search" style="color:#000"/>
+<input type="text" name="id" class="kw" size="8" maxlength="100" style="color:#bbb"/>
+<TD width = "80px" style="color:#C0C0C0">
+<input type="text" name="position" class="kw" size="5" maxlength="100" style="color:#bbb"/>
 <br />
 
 </form>
@@ -154,12 +209,11 @@
     //    exit;
         
     //}
-
     /******  build the pagination links ******/
     // range of num links to show
     $range = 3;
     
-    $pere = "&$areaid={$areaid}&areaname={$areaname}&areatype={$areatype}";
+    $pere = "&id={$id}&position={$position}";
     
     // if not on page 1, don't show back links
     if ($currentpage > 1) {
