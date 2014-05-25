@@ -43,7 +43,7 @@ function movtip(e){
 <div class="cover-container">
 <?php
     error_reporting(0);
-    session_start();
+    //session_start();
     require_once('header.php');
     //require_once('configure.php');
     
@@ -52,7 +52,7 @@ function movtip(e){
 <TR>
 <TD width = "70px "><a href="datas_artist.php"><h6 style="color:#F2F5A9">artist</h6>
 </td>
-<TD width = "70px "><a href="datas_genre.php"><h6 style="color:FFA500">genre</h6>
+<TD width = "70px "><a href="datas_genre.php"><h6 style="color:#FFA500">genre</h6>
 </td>
 <TD width = "70px "><a href="datas_track.php"><h6 style="color:#F2F5A9">track</h6>
 </td>

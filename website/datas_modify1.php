@@ -28,8 +28,8 @@
 </TR>
 </TABLE>
 <TABLE>
-<TD width = "80px" style="color:#FFFFFF"><a href="datas_modify.php" style="color:#FFFFFF">ARTIST</TD>
-<TD width = "150px "style="color:#C0C0C0"><a href="datas_modify1.php" style="color:#C0C0C0">ARTIST_GENRE</TD>
+<TD width = "80px" style="color:#FFFFFF"><a href="datas_modify.php" style="color:#C0C0C0">ARTIST</TD>
+<TD width = "150px "style="color:#C0C0C0"><a href="datas_modify1.php" style="color:#FFFFFF">ARTIST_GENRE</TD>
 <TD width = "150px "style="color:#C0C0C0"><a href="datas_modify2.php" style="color:#C0C0C0">ARTIST_TRACK</TD>
 <TD width = "80px "style="color:#C0C0C0"><a href="datas_modify3.php" style="color:#C0C0C0">GENRE</TD>
 <TD width = "150px "style="color:#C0C0C0"><a href="datas_modify4.php" style="color:#C0C0C0">RECORDING</TD>
@@ -39,46 +39,18 @@
 </TABLE>
 
 <?php
-    $id = '';
+    $aid = '';
     // get the keyword
-    if (isset($_GET['id'])) {
+    if (isset($_GET['aid'])) {
         // cast var as int
-        $id = (string) $_GET['id'];
+        $aid = (string) $_GET['aid'];
     }
     
-    $name = '';
+    $gid = '';
     // get the keyword
-    if (isset($_GET['name'])) {
+    if (isset($_GET['gid'])) {
         // cast var as int
-        $name = (string) $_GET['name'];
-    }
-    
-    $type = '';
-    // get the keyword
-    if (isset($_GET['type'])) {
-        // cast var as int
-        $type = (string) $_GET['type'];
-    }
-    
-    $gender = '';
-    // get the keyword
-    if (isset($_GET['gender'])) {
-        // cast var as int
-        $gender = (string) $_GET['gender'];
-    }
-    
-    $areaname = '';
-    // get the keyword
-    if (isset($_GET['areaname'])) {
-        // cast var as int
-        $areaname = (string) $_GET['areaname'];
-    }
-    
-    $areatype = '';
-    // get the keyword
-    if (isset($_GET['areatype'])) {
-        // cast var as int
-        $areatype = (string) $_GET['areatype'];
+        $gid = (string) $_GET['gid'];
     }
     
     $op = '';
@@ -97,7 +69,7 @@
         (host=".$ora_host.")(port=".$ora_port."))
         (connect_data=(service_name=".$ora_sid.")))";
         $conn = oci_connect($ora_username, $ora_password,$ora_connstr,$charset);
-        $sql = "insert into artist (id, name, type, gender, area_name, area_type) values ($id, '$name', '$type', '$gender', '$areaname', '$areatype')";
+        $sql = "insert into artist_genre (aid, gid) values ($aid, $gid)";
         echo $sql;
         //echo $sql;
         $stmt = oci_parse($conn, $sql);
@@ -107,50 +79,22 @@
         oci_execute($stmt, OCI_DEFAULT);
     }
     if ($run == 'delete') {
-        $sql = "delete from artist where ";
+        $sql = "delete from artist_genre where ";
         $query = '';
         $flag = 0;
-        if ($id <> '') {
+        if ($aid <> '') {
             if ($flag == 1) {
                 $query = "$query and ";
             }
             $flag = 1;
-            $query =  "$query id = $id ";
+            $query =  "$query aid = $aid ";
         }
-        if ($name <> '') {
+        if ($gid <> '') {
             if ($flag == 1) {
                 $query = "$query and ";
             }
             $flag = 1;
-            $query =  "$query name = '$name' ";
-        }
-        if ($areaname <> '') {
-            if ($flag == 1) {
-                $query = "$query and ";
-            }
-            $flag = 1;
-            $query =  "$query area_name = '$areaname' ";
-        }
-        if ($type <> '') {
-            if ($flag == 1) {
-                $query = "$query and ";
-            }
-            $flag = 1;
-            $query =  "$query type = '$type' ";
-        }
-        if ($gender <> '') {
-            if ($flag == 1) {
-                $query = "$query and ";
-            }
-            $flag = 1;
-            $query =  "$query gender = '$gender' ";
-        }
-        if ($area_type <> '') {
-            if ($flag == 1) {
-                $query = "$query and ";
-            }
-            $flag = 1;
-            $query =  "$query area_type = '$areatype' ";
+            $query =  "$query gid = '$gid' ";
         }
         $sql = "$sql $query";
         echo $sql;
@@ -176,18 +120,10 @@
 
 <form action="<?php $_SERVER['PHP_SELF']?>" method="get" name="search_form" target="_self" id="f" align = "left">
 <br>
-ID:
-<input type="text" name="id" class="kw" size="10" maxlength="100" style="color:#000"/> <br> <br>
-NAME:
-<input type="text" name="name" class="kw" size="10" maxlength="100" style="color:#000"/> <br> <br>
-TYPE:
-<input type="text" name="type" class="kw" size="10" maxlength="100" style="color:#000"/> <br> <br>
-GENDER:
-<input type="text" name="gender" class="kw" size="10" maxlength="100" style="color:#000"/> <br> <br>
-AREA_NAME:
-<input type="text" name="areaname" class="kw" size="10" maxlength="100" style="color:#000"/> <br> <br>
-AREA_TYPE:
-<input type="text" name="areatype" class="kw" size="10" maxlength="100" style="color:#000"/> <br> <br>
+AID:
+<input type="text" name="aid" class="kw" size="10" maxlength="100" style="color:#000"/> <br> <br>
+GID:
+<input type="text" name="gid" class="kw" size="10" maxlength="100" style="color:#000"/> <br> <br>
 Type of Operation:
 <input type="radio" name="op" value="insert" checked>INSERT
 <input type="radio" name="op" value="delete">DELETE

@@ -7,7 +7,7 @@
 <div class="cover-container">
 <?php
     
-    session_start();
+    //session_start();
     require_once('header.php');
     //require_once('configure.php');
     
