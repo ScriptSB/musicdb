@@ -24,7 +24,7 @@
 </td>
 <TD width = "40px "><a href="query_e.php"><h6 style="color:#F2F5A9">E</h6>
 </td>
-<TD width = "40px "><a href="query_f.php"><h6 style="color:#FFA500">F</h6>
+<TD width = "40px "><a href="query_f.php"><h6 style="color:#F2F5A9">F</h6>
 </td>
 <TD width = "40px "><a href="query_g.php"><h6 style="color:#F2F5A9">G</h6>
 </td>
@@ -44,7 +44,7 @@
 </td>
 <TD width = "40px "><a href="query_o.php"><h6 style="color:#F2F5A9">O</h6>
 </td>
-<TD width = "40px "><a href="query_p.php"><h6 style="color:#F2F5A9">P</h6>
+<TD width = "40px "><a href="query_p.php"><h6 style="color:#FFA500">P</h6>
 </td>
 <TD width = "40px "><a href="query_q.php"><h6 style="color:#F2F5A9">Q</h6>
 </td>
@@ -65,17 +65,25 @@
     (host=".$ora_host.")(port=".$ora_port."))
     (connect_data=(service_name=".$ora_sid.")))";
     $conn = oci_connect($ora_username, $ora_password,$ora_connstr,$charset);
-    $stmt = oci_parse($conn, "Select count(*) as COUNTNUM from (select female_count.area_name
-                      from (select artist.area_name, count(*)as count
-                            from artist artist
-                            where artist.AREA_TYPE='City' and gender ='Male'
-                            group by artist.area_name, artist.gender) male_count,
-                      (select artist.area_name, count(*)as count
-                       from artist artist
-                       where artist.AREA_TYPE='City' and gender ='Female'
-                       group by artist.area_name, artist.gender) female_count
-                      where male_count.area_name = female_count.area_name and 
-                      female_count.count > male_count.count)");
+    $stmt = oci_parse($conn, "Select count(*) as COUNTNUM from (select genre_name.name
+                      from (select artist_genre2.gid, count(*)as count
+                            from (select artist.id
+                                  from genre genre, artist artist, artist_genre artist_genre
+                                  where artist.type ='Group' and genre.id = artist_genre.gid and artist_genre.aid = artist.id
+                                  group by artist.id
+                                  having count(*)>=3)groupid, artist_genre artist_genre2
+                            where artist_genre2.aid = groupid.id
+                            group by artist_genre2.gid) lst,genre genre_name
+                      where genre_name.id = lst.gid and lst.count = (SELECT max(gid_count.count)  --find the count of the most popular genre first
+                                                                     FROM (select artist_genre2.gid, count(*)as count
+                                                                           from (select artist.id
+                                                                                 from genre genre, artist artist, artist_genre artist_genre
+                                                                                 where artist.type ='Group' and genre.id = artist_genre.gid and artist_genre.aid = artist.id
+                                                                                 group by artist.id
+                                                                                 having count(*)>=3)groupid, artist_genre artist_genre2
+                                                                           where artist_genre2.aid = groupid.id
+                                                                           group by artist_genre2.gid) gid_count
+                                                                     ))");
     oci_execute($stmt, OCI_DEFAULT);
     oci_fetch($stmt);
     $numrows = oci_result($stmt, 'COUNTNUM');
@@ -105,28 +113,36 @@
     // the offset of the list, based on current page
     $offset = ($currentpage - 1) * $rowsperpage;
     $num = $offset + $rowsperpage;
-    $sql = "SELECT * from (select ar.*, rownum rm FROM (select female_count.area_name
-    from (select artist.area_name, count(*)as count
-          from artist artist
-          where artist.AREA_TYPE='City' and gender ='Male'
-          group by artist.area_name, artist.gender) male_count,
-    (select artist.area_name, count(*)as count
-     from artist artist
-     where artist.AREA_TYPE='City' and gender ='Female'
-     group by artist.area_name, artist.gender) female_count
-    where male_count.area_name = female_count.area_name and
-    female_count.count > male_count.count) ar ) where rm between $offset and $num";
+    $sql = "SELECT * from (select ar.*, rownum rm FROM (select genre_name.name
+    from (select artist_genre2.gid, count(*)as count
+          from (select artist.id
+                from genre genre, artist artist, artist_genre artist_genre
+                where artist.type ='Group' and genre.id = artist_genre.gid and artist_genre.aid = artist.id
+                group by artist.id
+                having count(*)>=3)groupid, artist_genre artist_genre2
+          where artist_genre2.aid = groupid.id
+          group by artist_genre2.gid) lst,genre genre_name
+    where genre_name.id = lst.gid and lst.count = (SELECT max(gid_count.count)  --find the count of the most popular genre first
+                                                   FROM (select artist_genre2.gid, count(*)as count
+                                                         from (select artist.id
+                                                               from genre genre, artist artist, artist_genre artist_genre
+                                                               where artist.type ='Group' and genre.id = artist_genre.gid and artist_genre.aid = artist.id
+                                                               group by artist.id
+                                                               having count(*)>=3)groupid, artist_genre artist_genre2
+                                                         where artist_genre2.aid = groupid.id
+                                                         group by artist_genre2.gid) gid_count
+                                                   ) ) ar ) where rm between $offset and $num";
     $stid = oci_parse($conn, $sql);
     oci_execute($stid, OCI_DEFAULT);
     
     ?>
-    Query F: List all cities which have more female than male artists.
+    Query P: List the most popular genre among the groups which are associated with at least 3 genres.
 
     <?PHP
     while (oci_fetch($stid)) {
     ?>
         <TABLE>
-            <TD width = "500px "><?php echo oci_result($stid, 'AREA_NAME'); ?>
+            <TD width = "500px "><?php echo oci_result($stid, 'NAME'); ?>
         </TD>
         </TABLE>
     <?php

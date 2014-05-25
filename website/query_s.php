@@ -24,7 +24,7 @@
 </td>
 <TD width = "40px "><a href="query_e.php"><h6 style="color:#F2F5A9">E</h6>
 </td>
-<TD width = "40px "><a href="query_f.php"><h6 style="color:#FFA500">F</h6>
+<TD width = "40px "><a href="query_f.php"><h6 style="color:#F2F5A9">F</h6>
 </td>
 <TD width = "40px "><a href="query_g.php"><h6 style="color:#F2F5A9">G</h6>
 </td>
@@ -50,7 +50,7 @@
 </td>
 <TD width = "40px "><a href="query_r.php"><h6 style="color:#F2F5A9">R</h6>
 </td>
-<TD width = "40px "><a href="query_s.php"><h6 style="color:#F2F5A9">S</h6>
+<TD width = "40px "><a href="query_s.php"><h6 style="color:#FFA500">S</h6>
 </td>
 </TR>
 </TABLE>
@@ -65,20 +65,47 @@
     (host=".$ora_host.")(port=".$ora_port."))
     (connect_data=(service_name=".$ora_sid.")))";
     $conn = oci_connect($ora_username, $ora_password,$ora_connstr,$charset);
-    $stmt = oci_parse($conn, "Select count(*) as COUNTNUM from (select female_count.area_name
-                      from (select artist.area_name, count(*)as count
-                            from artist artist
-                            where artist.AREA_TYPE='City' and gender ='Male'
-                            group by artist.area_name, artist.gender) male_count,
-                      (select artist.area_name, count(*)as count
-                       from artist artist
-                       where artist.AREA_TYPE='City' and gender ='Female'
-                       group by artist.area_name, artist.gender) female_count
-                      where male_count.area_name = female_count.area_name and 
-                      female_count.count > male_count.count)");
+    $view = "create view hittrack as
+    select t.rcid
+    from track t
+    group by t.rcid
+    having count(distinct t.mid)>100";
+    $stid = oci_parse($conn, $view);
+    oci_execute($stid, OCI_DEFAULT);
+    $view = "create view htid as
+    select t.tid, t.rcid
+    from track t, hittrack ht
+    where t.rcid = ht.rcid";
+    $stid = oci_parse($conn, $view);
+    oci_execute($stid, OCI_DEFAULT);
+    $view = "create view hitartist as
+    select at1.aid
+    from artist_track at1,htid t
+    where t.tid = at1.tid
+    group by at1.aid
+    having count(distinct t.rcid)>10";
+    $stid = oci_parse($conn, $view);
+    oci_execute($stid, OCI_DEFAULT);
+    $view = "create view hitability as
+    select lst.aid , sum(lst.count) as score
+    from (select hiat.aid, t.rcid ,count(distinct t.mid) as count, rank() over (partition by hiat.aid order by count(distinct t.mid) desc) as rank
+          from track t,(select hta.aid,at1.tid
+                        from hitartist hta, artist_track at1
+                        where hta.aid = at1.aid) hiat
+          where t.tid = hiat.tid
+          group by hiat.aid,t.rcid
+          having count(distinct t.mid)>100) lst
+    where lst.rank<=10 
+    group by lst.aid";
+    $stid = oci_parse($conn, $view);
+    oci_execute($stid, OCI_DEFAULT);
+    $stmt = oci_parse($conn, "Select count(*) as COUNTNUM from (select artist.name, ab.score
+                      from hitartist art , hitability ab,artist
+                      where art.aid = ab.aid and artist.id = art.aid)");
     oci_execute($stmt, OCI_DEFAULT);
     oci_fetch($stmt);
     $numrows = oci_result($stmt, 'COUNTNUM');
+    //echo $numrows;
     //oci_fetch($r);
     $rowsperpage = 20;
     // find out total pages
@@ -103,30 +130,28 @@
     } // end if
     
     // the offset of the list, based on current page
-    $offset = ($currentpage - 1) * $rowsperpage;
-    $num = $offset + $rowsperpage;
-    $sql = "SELECT * from (select ar.*, rownum rm FROM (select female_count.area_name
-    from (select artist.area_name, count(*)as count
-          from artist artist
-          where artist.AREA_TYPE='City' and gender ='Male'
-          group by artist.area_name, artist.gender) male_count,
-    (select artist.area_name, count(*)as count
-     from artist artist
-     where artist.AREA_TYPE='City' and gender ='Female'
-     group by artist.area_name, artist.gender) female_count
-    where male_count.area_name = female_count.area_name and
-    female_count.count > male_count.count) ar ) where rm between $offset and $num";
+    $offset = ($currentpage - 1) * $rowsperpage + 1;
+    $num = $offset + $rowsperpage + 1;
+    $sql = "SELECT * from (select ar.*, rownum rm FROM (select artist.name, ab.score
+    from hitartist art , hitability ab,artist
+    where art.aid = ab.aid and artist.id = art.aid
+) ar ) where rm between $offset and $num";
     $stid = oci_parse($conn, $sql);
     oci_execute($stid, OCI_DEFAULT);
     
     ?>
-    Query F: List all cities which have more female than male artists.
-
+    Query S: List all “hit artists” according to their "hit ability".
+<TABLE>
+<TD width = "200px" style="color:#C0C0C0">NAME
+<TD width = "300px "style="color:#C0C0C0">SCORE
+</TD>
+</TABLE>
     <?PHP
     while (oci_fetch($stid)) {
     ?>
         <TABLE>
-            <TD width = "500px "><?php echo oci_result($stid, 'AREA_NAME'); ?>
+            <TD width = "300px "><?php echo oci_result($stid, 'NAME'); ?>
+<TD width = "200px "><?php echo oci_result($stid, 'SCORE'); ?>
         </TD>
         </TABLE>
     <?php

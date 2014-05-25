@@ -24,9 +24,9 @@
 </td>
 <TD width = "40px "><a href="query_e.php"><h6 style="color:#F2F5A9">E</h6>
 </td>
-<TD width = "40px "><a href="query_f.php"><h6 style="color:#FFA500">F</h6>
+<TD width = "40px "><a href="query_f.php"><h6 style="color:#F2F5A9">F</h6>
 </td>
-<TD width = "40px "><a href="query_g.php"><h6 style="color:#F2F5A9">G</h6>
+<TD width = "40px "><a href="query_g.php"><h6 style="color:#FFA500">G</h6>
 </td>
 <TD width = "40px "><a href="query_h.php"><h6 style="color:#F2F5A9">H</h6>
 </td>
@@ -65,20 +65,21 @@
     (host=".$ora_host.")(port=".$ora_port."))
     (connect_data=(service_name=".$ora_sid.")))";
     $conn = oci_connect($ora_username, $ora_password,$ora_connstr,$charset);
-    $stmt = oci_parse($conn, "Select count(*) as COUNTNUM from (select female_count.area_name
-                      from (select artist.area_name, count(*)as count
-                            from artist artist
-                            where artist.AREA_TYPE='City' and gender ='Male'
-                            group by artist.area_name, artist.gender) male_count,
-                      (select artist.area_name, count(*)as count
-                       from artist artist
-                       where artist.AREA_TYPE='City' and gender ='Female'
-                       group by artist.area_name, artist.gender) female_count
-                      where male_count.area_name = female_count.area_name and 
-                      female_count.count > male_count.count)");
+    $view = "create view med_track as
+    select release_medium.MID,count(*) as tracks
+    from ReleaseMedium release_medium,TRACK track
+    where track.MID = release_medium.MID
+    group by release_medium.MID order by count(*) desc";
+    $stid = oci_parse($conn, $view);
+    oci_execute($stid, OCI_DEFAULT);
+    $stmt = oci_parse($conn, "Select count(*) as COUNTNUM from (select med_track.mid
+                      from  med_track
+                      where med_track.tracks =(select MAX(med_track.tracks)
+                                               from  med_track))");
     oci_execute($stmt, OCI_DEFAULT);
     oci_fetch($stmt);
     $numrows = oci_result($stmt, 'COUNTNUM');
+    //echo $numrows;
     //oci_fetch($r);
     $rowsperpage = 20;
     // find out total pages
@@ -103,30 +104,24 @@
     } // end if
     
     // the offset of the list, based on current page
-    $offset = ($currentpage - 1) * $rowsperpage;
-    $num = $offset + $rowsperpage;
-    $sql = "SELECT * from (select ar.*, rownum rm FROM (select female_count.area_name
-    from (select artist.area_name, count(*)as count
-          from artist artist
-          where artist.AREA_TYPE='City' and gender ='Male'
-          group by artist.area_name, artist.gender) male_count,
-    (select artist.area_name, count(*)as count
-     from artist artist
-     where artist.AREA_TYPE='City' and gender ='Female'
-     group by artist.area_name, artist.gender) female_count
-    where male_count.area_name = female_count.area_name and
-    female_count.count > male_count.count) ar ) where rm between $offset and $num";
+    $offset = ($currentpage - 1) * $rowsperpage + 1;
+    $num = $offset + $rowsperpage + 1;
+    $sql = "SELECT * from (select ar.*, rownum rm FROM (select med_track.mid
+    from  med_track
+    where med_track.tracks =(select MAX(med_track.tracks)
+                             from  med_track)
+) ar ) where rm between $offset and $num";
     $stid = oci_parse($conn, $sql);
     oci_execute($stid, OCI_DEFAULT);
     
     ?>
-    Query F: List all cities which have more female than male artists.
+    Query G: List the mediums with the highest number of tracks.
 
     <?PHP
     while (oci_fetch($stid)) {
     ?>
         <TABLE>
-            <TD width = "500px "><?php echo oci_result($stid, 'AREA_NAME'); ?>
+            <TD width = "500px "><?php echo oci_result($stid, 'MID'); ?>
         </TD>
         </TABLE>
     <?php

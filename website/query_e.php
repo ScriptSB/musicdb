@@ -65,7 +65,7 @@
     (host=".$ora_host.")(port=".$ora_port."))
     (connect_data=(service_name=".$ora_sid.")))";
     $conn = oci_connect($ora_username, $ora_password,$ora_connstr,$charset);
-    $stmt = oci_parse($conn, "Select count(*) as COUNTNUM from (select artist.name   according to artist id
+    $stmt = oci_parse($conn, "Select count(*) as COUNTNUM from (select artist.name
                       from (select artist.id
                             from artist artist, artist_genre art_genre, genre genre
                             where artist.id = art_genre.aid and art_genre.GID = genre.ID and artist.gender = 'Female'
@@ -106,8 +106,7 @@
     // the offset of the list, based on current page
     $offset = ($currentpage - 1) * $rowsperpage;
     $num = $offset + $rowsperpage;
-    $sql = "SELECT * from (select ar.*, rownum rm FROM (select artist.name   according to artist id
-    from (select artist.id
+    $sql = "SELECT * from (select ar.*, rownum rm FROM (select artist.name      from (select artist.id
           from artist artist, artist_genre art_genre, genre genre
           where artist.id = art_genre.aid and art_genre.GID = genre.ID and artist.gender = 'Female'
           group by artist.id
@@ -117,7 +116,7 @@
                                    from artist artist2, artist_genre art_genre2, genre genre2
                                    where artist2.id = art_genre2.aid and art_genre2.GID = genre2.ID and artist2.gender = 'Female'
                                    group by artist2.id) genre_count))max_count,artist artist
-    where artist.id = max_count.ID) ar ) where rm between $offset and $num";
+    where artist.id = max_count.ID) ar )";
     $stid = oci_parse($conn, $sql);
     oci_execute($stid, OCI_DEFAULT);
     

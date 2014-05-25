@@ -24,7 +24,7 @@
 </td>
 <TD width = "40px "><a href="query_e.php"><h6 style="color:#F2F5A9">E</h6>
 </td>
-<TD width = "40px "><a href="query_f.php"><h6 style="color:#FFA500">F</h6>
+<TD width = "40px "><a href="query_f.php"><h6 style="color:#F2F5A9">F</h6>
 </td>
 <TD width = "40px "><a href="query_g.php"><h6 style="color:#F2F5A9">G</h6>
 </td>
@@ -36,7 +36,7 @@
 </td>
 <TD width = "40px "><a href="query_k.php"><h6 style="color:#F2F5A9">K</h6>
 </td>
-<TD width = "40px "><a href="query_l.php"><h6 style="color:#F2F5A9">L</h6>
+<TD width = "40px "><a href="query_l.php"><h6 style="color:#FFA500">L</h6>
 </td>
 <TD width = "40px "><a href="query_m.php"><h6 style="color:#F2F5A9">M</h6>
 </td>
@@ -65,17 +65,18 @@
     (host=".$ora_host.")(port=".$ora_port."))
     (connect_data=(service_name=".$ora_sid.")))";
     $conn = oci_connect($ora_username, $ora_password,$ora_connstr,$charset);
-    $stmt = oci_parse($conn, "Select count(*) as COUNTNUM from (select female_count.area_name
-                      from (select artist.area_name, count(*)as count
-                            from artist artist
-                            where artist.AREA_TYPE='City' and gender ='Male'
-                            group by artist.area_name, artist.gender) male_count,
-                      (select artist.area_name, count(*)as count
-                       from artist artist
-                       where artist.AREA_TYPE='City' and gender ='Female'
-                       group by artist.area_name, artist.gender) female_count
-                      where male_count.area_name = female_count.area_name and 
-                      female_count.count > male_count.count)");
+    $stmt = oci_parse($conn, "Select count(*) as COUNTNUM from (select *
+                      from (select MaleArtist.area_name , MaleArtist.id, count(*), rank() over (Partition by MaleArtist.area_name order by count(artist_track.tid))as rank
+                            from artist_track artist_track,(select artist.id, artist.name, artist.area_name
+                                                            from artist, (select artist.area_name
+                                                                          from artist
+                                                                          where artist.type = 'Group' and artist.area_name is not null
+                                                                          group by artist.area_name
+                                                                          having count(*)>10) arealist
+                                                            where artist.area_name  = arealist.area_name and artist.gender = 'Male') MaleArtist
+                            where artist_track.aid = MaleArtist.id 
+                            group by MaleArtist.area_name,MaleArtist.id)
+                      where rank<=5)");
     oci_execute($stmt, OCI_DEFAULT);
     oci_fetch($stmt);
     $numrows = oci_result($stmt, 'COUNTNUM');
@@ -105,28 +106,35 @@
     // the offset of the list, based on current page
     $offset = ($currentpage - 1) * $rowsperpage;
     $num = $offset + $rowsperpage;
-    $sql = "SELECT * from (select ar.*, rownum rm FROM (select female_count.area_name
-    from (select artist.area_name, count(*)as count
-          from artist artist
-          where artist.AREA_TYPE='City' and gender ='Male'
-          group by artist.area_name, artist.gender) male_count,
-    (select artist.area_name, count(*)as count
-     from artist artist
-     where artist.AREA_TYPE='City' and gender ='Female'
-     group by artist.area_name, artist.gender) female_count
-    where male_count.area_name = female_count.area_name and
-    female_count.count > male_count.count) ar ) where rm between $offset and $num";
+    $sql = "SELECT * from (select ar.*, rownum rm FROM (select *
+    from (select MaleArtist.area_name , MaleArtist.id, count(*), rank() over (Partition by MaleArtist.area_name order by count(artist_track.tid))as rank
+          from artist_track artist_track,(select artist.id, artist.name, artist.area_name
+                                          from artist, (select artist.area_name
+                                                        from artist
+                                                        where artist.type = 'Group' and artist.area_name is not null
+                                                        group by artist.area_name
+                                                        having count(*)>10) arealist
+                                          where artist.area_name  = arealist.area_name and artist.gender = 'Male') MaleArtist
+          where artist_track.aid = MaleArtist.id
+          group by MaleArtist.area_name,MaleArtist.id)
+    where rank<=5) ar ) where rm between $offset and $num";
     $stid = oci_parse($conn, $sql);
     oci_execute($stid, OCI_DEFAULT);
     
     ?>
-    Query F: List all cities which have more female than male artists.
+    Query L: For each area with more than 10 groups, list the 5 male artists that have recorded the highest number of tracks.
+<TABLE>
+<TD width = "200px" style="color:#C0C0C0">AREA NAME
+<TD width = "300px "style="color:#C0C0C0">ARTIST ID
+</TD>
+</TABLE>
 
     <?PHP
     while (oci_fetch($stid)) {
     ?>
         <TABLE>
-            <TD width = "500px "><?php echo oci_result($stid, 'AREA_NAME'); ?>
+            <TD width = "200px "><?php echo oci_result($stid, 'AREA_NAME'); ?>
+<TD width = "200px "><?php echo oci_result($stid, 'ID'); ?>
         </TD>
         </TABLE>
     <?php

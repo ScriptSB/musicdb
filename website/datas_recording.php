@@ -58,9 +58,7 @@ function movtip(e){
 </td>
 <TD width = "70px "><a href="datas_recording.php"><h6 style="color:#FFA500">recording</h6>
 </td>
-<TD width = "70px "><a href="datas_relemedi.php"><h6 style="color:#F2F5A9">release_medium</h6>
-</td>
-<TD width = "100px "><a href="datas_modify.php"><h6 style="color:#F2F5A9">modify_data</h6>
+<TD width = "100px "><a href="datas_relemedi.php"><h6 style="color:#F2F5A9">release_medium</h6>
 </td>
 <TD width = "100px "><a href="datas_modify.php"><h6 style="color:#F2F5A9">modify_data</h6>
 </td>
@@ -101,7 +99,7 @@ function movtip(e){
     $conn = oci_connect($ora_username, $ora_password,$ora_connstr,$charset);
     $sql = "SELECT count(*) as COUNTNUM from (select ar.* FROM ( select * from recording where ID like '%$id%' and NAME like '%$name%'and LENGTH like '%$length%') ar )";
     $stmt = oci_parse($conn, $sql);
-    
+
     oci_execute($stmt, OCI_DEFAULT);
     oci_fetch($stmt);
     
@@ -128,7 +126,8 @@ function movtip(e){
         // set current page to first page
         $currentpage = 1;
     } // end if
-    
+    ?>
+<?php
     // the offset of the list, based on current page
     $offset = ($currentpage - 1) * $rowsperpage + 1;
     $num = $offset + $rowsperpage - 1;
@@ -145,12 +144,12 @@ function movtip(e){
 </TD>
 </TABLE>
 
-    <?PHP
+<?PHP
     while (oci_fetch($stid)) {
-    ?>
-        <TABLE>
-            <TD width = "80px "><?php echo oci_result($stid, 'ID'); ?>
-            <TD width = "300px "><?php $namee = oci_result($stid, 'NAME');
+        ?>
+<TABLE>
+<TD width = "80px "><?php echo oci_result($stid, 'ID'); ?>
+<TD width = "300px "><?php $namee = oci_result($stid, 'NAME');
     if (mb_strlen($namee) <= 35) {
         echo $namee;
     }
@@ -158,14 +157,14 @@ function movtip(e){
         echo substr($namee, 0, 32);
         echo "...";
     }?>
-            <TD width = "80px "><?php echo oci_result($stid, 'LENGTH'); ?>
-        <TD width = "80px "><a id="tip" href="#" onmousemove="movtip(event)">T
-            <?php
-                $aaid = oci_result($stid, 'ID');
-                $sql1 = "SELECT track.TID, track.POSITION FROM track where track.RCID like '$aaid'";
-                $stid1 = oci_parse($conn, $sql1);
-                oci_execute($stid1, OCI_DEFAULT);
-            ?>
+<TD width = "80px "><?php echo oci_result($stid, 'LENGTH'); ?>
+<TD width = "80px "><a id="tip" href="#" onmousemove="movtip(event)">T
+<?php
+    $aaid = oci_result($stid, 'ID');
+    $sql1 = "SELECT track.TID, track.POSITION FROM track where track.RCID like '$aaid'";
+    $stid1 = oci_parse($conn, $sql1);
+    oci_execute($stid1, OCI_DEFAULT);
+    ?>
 <span id="tip_info"><?php
     while (oci_fetch($stid1)) {
         $out = oci_result($stid1, 'TID');
@@ -177,7 +176,7 @@ function movtip(e){
 
 </TD>
 
-        </TABLE>
+</TABLE>
 <?PHP } ?>
 <form action="<?php $_SERVER['PHP_SELF']?>" method="get" name="search_form" target="_self" id="f">
 <TABLE>
@@ -195,13 +194,13 @@ function movtip(e){
 <?php
     //$conn = oci_connect('db2014_g18', 'db2014_g18', 'icoracle.epfl.ch:1521/srso4.epfl.ch');
     //if (!$conn) {
-        
+    
     //    $e = oci_error();
-        
+    
     //    print htmlentities($e['message']);
-        
+    
     //    exit;
-        
+    
     //}
     /******  build the pagination links ******/
     // range of num links to show
