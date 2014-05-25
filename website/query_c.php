@@ -14,19 +14,43 @@
 ?>
 <TABLE>
 <TR>
-<TD width = "40px "><a href="datas.php"><h6 style="color:#FFA500">A</h6>
+<TD width = "40px "><a href="query_a.php"><h6 style="color:#F2F5A9">A</h6>
 </TD>
-<TD width = "40px "><a href="datas_artist.php"><h6 style="color:#F2F5A9">B</h6>
+<TD width = "40px "><a href="query_b.php"><h6 style="color:#F2F5A9">B</h6>
 </td>
-<TD width = "40px "><a href="datas_argenre.php"><h6 style="color:#F2F5A9">C</h6>
+<TD width = "40px "><a href="query_c.php"><h6 style="color:#FFA500">C</h6>
 </td>
-<TD width = "40px "><a href="datas_artrack.php"><h6 style="color:#F2F5A9">D</h6>
+<TD width = "40px "><a href="query_d.php"><h6 style="color:#F2F5A9">D</h6>
 </td>
-<TD width = "40px "><a href="datas_genre.php"><h6 style="color:#F2F5A9">E</h6>
+<TD width = "40px "><a href="query_e.php"><h6 style="color:#F2F5A9">E</h6>
 </td>
-<TD width = "40px "><a href="datas_medium.php"><h6 style="color:#F2F5A9">F</h6>
+<TD width = "40px "><a href="query_f.php"><h6 style="color:#F2F5A9">F</h6>
 </td>
-<TD width = "40px "><a href="datas_recording.php"><h6 style="color:#F2F5A9">G</h6>
+<TD width = "40px "><a href="query_g.php"><h6 style="color:#F2F5A9">G</h6>
+</td>
+<TD width = "40px "><a href="query_h.php"><h6 style="color:#F2F5A9">H</h6>
+</td>
+<TD width = "40px "><a href="query_i.php"><h6 style="color:#F2F5A9">I</h6>
+</td>
+<TD width = "40px "><a href="query_j.php"><h6 style="color:#F2F5A9">J</h6>
+</td>
+<TD width = "40px "><a href="query_k.php"><h6 style="color:#F2F5A9">K</h6>
+</td>
+<TD width = "40px "><a href="query_l.php"><h6 style="color:#F2F5A9">L</h6>
+</td>
+<TD width = "40px "><a href="query_m.php"><h6 style="color:#F2F5A9">M</h6>
+</td>
+<TD width = "40px "><a href="query_n.php"><h6 style="color:#F2F5A9">N</h6>
+</td>
+<TD width = "40px "><a href="query_o.php"><h6 style="color:#F2F5A9">O</h6>
+</td>
+<TD width = "40px "><a href="query_p.php"><h6 style="color:#F2F5A9">P</h6>
+</td>
+<TD width = "40px "><a href="query_q.php"><h6 style="color:#F2F5A9">Q</h6>
+</td>
+<TD width = "40px "><a href="query_r.php"><h6 style="color:#F2F5A9">R</h6>
+</td>
+<TD width = "40px "><a href="query_s.php"><h6 style="color:#F2F5A9">S</h6>
 </td>
 </TR>
 </TABLE>
@@ -41,7 +65,7 @@
     (host=".$ora_host.")(port=".$ora_port."))
     (connect_data=(service_name=".$ora_sid.")))";
     $conn = oci_connect($ora_username, $ora_password,$ora_connstr,$charset);
-    $stmt = oci_parse($conn, "Select count(*) as COUNTNUM from init_area area, init_artist artist where area.areaname='Switzerland'");
+    $stmt = oci_parse($conn, "Select count(*) as COUNTNUM from (select artist.name from (select artist.NAME,count(*) from artist artist,artist_track A_T where artist.type='Group' and A_T.aid=artist.id group by artist.name order by count(*) desc) artist where Rownum <= 10)");
     oci_execute($stmt, OCI_DEFAULT);
     oci_fetch($stmt);
     $numrows = oci_result($stmt, 'COUNTNUM');
@@ -71,18 +95,18 @@
     // the offset of the list, based on current page
     $offset = ($currentpage - 1) * $rowsperpage;
     $num = $offset + $rowsperpage;
-    $sql = "select artist.ANAME from init_area area, init_artist artist where area.areaname='Switzerland' and rownum between {$offset} and {$num} ";
+    $sql = "SELECT * from (select ar.*, rownum rm FROM (select artist.name from (select artist.NAME,count(*) from artist artist,artist_track A_T where artist.type='Group' and A_T.aid=artist.id group by artist.name order by count(*) desc) artist where Rownum <= 10) ar ) where rm between $offset and $num";
     $stid = oci_parse($conn, $sql);
     oci_execute($stid, OCI_DEFAULT);
     
     ?>
-    Queries: Print the names of artists from Switzerland, i.e., artists whose area is Switzerland.
+    Query C: List the names of 10 groups with the most recorded tracks.
 
     <?PHP
     while (oci_fetch($stid)) {
     ?>
         <TABLE>
-            <TD width = "200px "><?php echo oci_result($stid, 'ANAME'); ?>
+            <TD width = "500px "><?php echo oci_result($stid, 'NAME'); ?>
         </TD>
         </TABLE>
     <?php

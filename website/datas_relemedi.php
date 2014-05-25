@@ -58,7 +58,9 @@ function movtip(e){
 </td>
 <TD width = "70px "><a href="datas_recording.php"><h6 style="color:#F2F5A9">recording</h6>
 </td>
-<TD width = "70px "><a href="datas_relemedi.php"><h6 style="color:FFA500">release_medium</h6>
+<TD width = "100px "><a href="datas_relemedi.php"><h6 style="color:FFA500">release_medium</h6>
+</td>
+<TD width = "100px "><a href="datas_modify.php"><h6 style="color:#F2F5A9">modify_data</h6>
 </td>
 </TR>
 </TABLE>
@@ -178,14 +180,12 @@ function movtip(e){
         echo "...";
     }?>
             <TD width = "200px "><?php echo oci_result($stid, 'FORMAT'); ?>
-            <TD width = "80px "><?php echo oci_result($stid, 'GENDER'); ?>
 <TD width = "80px "><a id="tip" href="#" onmousemove="movtip(event)">T
 <?php
     $aaid = oci_result($stid, 'MID');
     $sql1 = "SELECT track.TID, track.POSITION FROM track where track.MID like '$aaid'";
     $stid1 = oci_parse($conn, $sql1);
     oci_execute($stid1, OCI_DEFAULT);
-    oci_fetch($stid1);
     ?>
 <span id="tip_info"><?php
     while (oci_fetch($stid1)) {
@@ -207,9 +207,9 @@ function movtip(e){
 <TD width = "100px" style="color:#C0C0C0">
 <input type="text" name="mid" class="kw" size="5" maxlength="100" style="color:#bbb"/>
 <TD width = "200px" style="color:#C0C0C0">
-<input type="text" name="name" class="kw" size="8" maxlength="100" style="color:#bbb"/>
+<input type="text" name="name" class="kw" size="10" maxlength="200" style="color:#bbb"/>
 <TD width = "200px" style="color:#C0C0C0">
-<input type="text" name="format" class="kw" size="8" maxlength="100" style="color:#bbb"/>
+<input type="text" name="format" class="kw" size="8" maxlength="200" style="color:#bbb"/>
 </TABLE>
 <input name="submit" type="submit" class="sb" value="keyword search" style="color:#000"/>
 <br />

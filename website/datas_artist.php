@@ -58,7 +58,9 @@ function movtip(e){
 </td>
 <TD width = "70px "><a href="datas_recording.php"><h6 style="color:#F2F5A9">recording</h6>
 </td>
-<TD width = "70px "><a href="datas_relemedi.php"><h6 style="color:#F2F5A9">release_medium</h6>
+<TD width = "100px "><a href="datas_relemedi.php"><h6 style="color:#F2F5A9">release_medium</h6>
+</td>
+<TD width = "100px "><a href="datas_modify.php"><h6 style="color:#F2F5A9">modify_data</h6>
 </td>
 </TR>
 </TABLE>
@@ -210,7 +212,6 @@ function movtip(e){
                 $sql1 = "SELECT genre.ID, genre.name FROM artist_genre, genre where artist_genre.AID like '$aaid' and genre.ID = artist_genre.GID";
                 $stid1 = oci_parse($conn, $sql1);
                 oci_execute($stid1, OCI_DEFAULT);
-                oci_fetch($stid1);
             ?>
 <span id="tip_info"><?php
     while (oci_fetch($stid1)) {
@@ -228,7 +229,6 @@ function movtip(e){
     $sql1 = "SELECT track.TID, track.POSITION FROM artist_track, track where artist_track.AID like '$aaid' and track.TID = artist_track.TID";
     $stid1 = oci_parse($conn, $sql1);
     oci_execute($stid1, OCI_DEFAULT);
-    oci_fetch($stid1);
     ?>
 <span id="tip_info"><?php
     while (oci_fetch($stid1)) {

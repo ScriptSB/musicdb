@@ -58,7 +58,9 @@ function movtip(e){
 </td>
 <TD width = "70px "><a href="datas_recording.php"><h6 style="color:#F2F5A9">recording</h6>
 </td>
-<TD width = "70px "><a href="datas_relemedi.php"><h6 style="color:#F2F5A9">release_medium</h6>
+<TD width = "100px "><a href="datas_relemedi.php"><h6 style="color:#F2F5A9">release_medium</h6>
+<TD width = "100px "><a href="datas_modify.php"><h6 style="color:#F2F5A9">modify_data</h6>
+</td>
 </td>
 </TR>
 </TABLE>
@@ -139,6 +141,7 @@ function movtip(e){
 <TD width = "80px "style="color:#C0C0C0">POSITION
 <TD width = "120px "style="color:#C0C0C0">MEDIUM_ID
 <TD width = "120px "style="color:#C0C0C0">RECORDING_ID
+<TD width = "80px "style="color:#C0C0C0">ARTIST
 </TD>
 </TABLE>
 
@@ -155,7 +158,6 @@ function movtip(e){
                 $sql1 = "SELECT releasemedium.NAME, releasemedium.FORMAT FROM releasemedium where releasemedium.MID like '$aaid'";
                 $stid1 = oci_parse($conn, $sql1);
                 oci_execute($stid1, OCI_DEFAULT);
-                oci_fetch($stid1);
             ?>
 <span id="tip_info"><?php
     while (oci_fetch($stid1)) {
@@ -174,7 +176,6 @@ function movtip(e){
     $sql1 = "SELECT recording.NAME, recording.LENGTH FROM recording where recording.ID like '$aaid'";
     $stid1 = oci_parse($conn, $sql1);
     oci_execute($stid1, OCI_DEFAULT);
-    oci_fetch($stid1);
     ?>
 <span id="tip_info"><?php
     while (oci_fetch($stid1)) {
@@ -186,6 +187,24 @@ function movtip(e){
 
 
 </TD>
+<TD width = "80px "><a id="tip" href="#" onmousemove="movtip(event)">A
+<?php
+    $aaid = oci_result($stid, 'TID');
+    $sql1 = "SELECT artist.ID, artist.NAME FROM artist_track, artist where artist_track.TID like '$aaid' and artist.ID = artist_track.AID";
+    $stid1 = oci_parse($conn, $sql1);
+    oci_execute($stid1, OCI_DEFAULT);
+    ?>
+<span id="tip_info"><?php
+    while (oci_fetch($stid1)) {
+        $out = oci_result($stid1, 'ID');
+        $out1 = oci_result($stid1, 'NAME');
+        echo $out1;echo "("; echo $out; echo ")";
+    } ?></span></a>
+
+
+
+</TD>
+
 
         </TABLE>
 <?PHP } ?>

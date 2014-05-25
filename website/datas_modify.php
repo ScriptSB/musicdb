@@ -54,15 +54,13 @@ function movtip(e){
 </td>
 <TD width = "70px "><a href="datas_genre.php"><h6 style="color:#F2F5A9">genre</h6>
 </td>
-<TD width = "70px "><a href="datas_track.php"><h6 style="color:#F2F5A9">track</h6>
+<TD width = "70px "><a href="datas_track.php"><h6 style="color:FFA500">track</h6>
 </td>
-<TD width = "70px "><a href="datas_recording.php"><h6 style="color:FFA500">recording</h6>
+<TD width = "70px "><a href="datas_recording.php"><h6 style="color:#F2F5A9">recording</h6>
 </td>
-<TD width = "70px "><a href="datas_relemedi.php"><h6 style="color:#F2F5A9">release_medium</h6>
-</td>
+<TD width = "100px "><a href="datas_relemedi.php"><h6 style="color:#F2F5A9">release_medium</h6>
 <TD width = "100px "><a href="datas_modify.php"><h6 style="color:#F2F5A9">modify_data</h6>
 </td>
-<TD width = "100px "><a href="datas_modify.php"><h6 style="color:#F2F5A9">modify_data</h6>
 </td>
 </TR>
 </TABLE>
@@ -70,23 +68,17 @@ function movtip(e){
 <?php
     
     $id = '';
+    // get the keyword
     if (isset($_GET['id'])) {
         // cast var as int
         $id = (string) $_GET['id'];
     }
     
-    $name = '';
+    $position = '';
     // get the keyword
-    if (isset($_GET['name'])) {
+    if (isset($_GET['position'])) {
         // cast var as int
-        $name = (string) $_GET['name'];
-    }
-    
-    $length = '';
-    // get the keyword
-    if (isset($_GET['length'])) {
-        // cast var as int
-        $type = (string) $_GET['length'];
+        $position = (string) $_GET['position'];
     }
     
     $ora_host = "icoracle.epfl.ch";
@@ -99,49 +91,22 @@ function movtip(e){
     (host=".$ora_host.")(port=".$ora_port."))
     (connect_data=(service_name=".$ora_sid.")))";
     $conn = oci_connect($ora_username, $ora_password,$ora_connstr,$charset);
-    $sql = "SELECT count(*) as COUNTNUM from (select ar.* FROM ( select * from recording where ID like '%$id%' and NAME like '%$name%'and LENGTH like '%$length%') ar )";
-    $stmt = oci_parse($conn, $sql);
     
-    oci_execute($stmt, OCI_DEFAULT);
-    oci_fetch($stmt);
+    //$sql = "SELECT count(*) as COUNTNUM from (select ar.* FROM ( select * from track where TID like '%$id%' and POSITION like '%$position%') ar )";
+    //$stmt = oci_parse($conn, $sql);
     
-    $numrows = oci_result($stmt, 'COUNTNUM');
-    //oci_fetch($r);
-    $rowsperpage = 20;
-    // find out total pages
-    $totalpages = ceil($numrows / $rowsperpage);
-    // get the current page or set a default
-    if (isset($_GET['currentpage']) && is_numeric($_GET['currentpage'])) {
-        // cast var as int
-        $currentpage = (int) $_GET['currentpage'];
-    } else {
-        // default page num
-        $currentpage = 1;
-    } // end if
-    // if current page is greater than total pages...
-    if ($currentpage > $totalpages) {
-        // set current page to last page
-        $currentpage = $totalpages;
-    } // end if
-    // if current page is less than first page...
-    if ($currentpage < 1) {
-        // set current page to first page
-        $currentpage = 1;
-    } // end if
+    //oci_execute($stmt, OCI_DEFAULT);
+    //oci_fetch($stmt);
     
     // the offset of the list, based on current page
-    $offset = ($currentpage - 1) * $rowsperpage + 1;
-    $num = $offset + $rowsperpage - 1;
-    $sql = "SELECT * from (select ar.*, rownum rm FROM  ( select * from recording where ID like '%$id%' and NAME like '%$name%'and LENGTH like '%$length%') ar ) where rm between $offset and $num";
-    $stid = oci_parse($conn, $sql);
-    oci_execute($stid, OCI_DEFAULT);
     ?>
 
 <TABLE>
-<TD width = "80px" style="color:#C0C0C0">ID
-<TD width = "300px "style="color:#C0C0C0">NAME
-<TD width = "80px "style="color:#C0C0C0">LENGTH
-<TD width = "80px "style="color:#C0C0C0">TRACK
+<TD width = "200px" style="color:#C0C0C0">ID
+<TD width = "80px "style="color:#C0C0C0">POSITION
+<TD width = "120px "style="color:#C0C0C0">MEDIUM_ID
+<TD width = "120px "style="color:#C0C0C0">RECORDING_ID
+<TD width = "80px "style="color:#C0C0C0">ARTIST
 </TD>
 </TABLE>
 
@@ -149,46 +114,71 @@ function movtip(e){
     while (oci_fetch($stid)) {
     ?>
         <TABLE>
-            <TD width = "80px "><?php echo oci_result($stid, 'ID'); ?>
-            <TD width = "300px "><?php $namee = oci_result($stid, 'NAME');
-    if (mb_strlen($namee) <= 35) {
-        echo $namee;
-    }
-    else {
-        echo substr($namee, 0, 32);
-        echo "...";
-    }?>
-            <TD width = "80px "><?php echo oci_result($stid, 'LENGTH'); ?>
-        <TD width = "80px "><a id="tip" href="#" onmousemove="movtip(event)">T
+            <TD width = "200px "><?php echo oci_result($stid, 'TID'); ?>
+            <TD width = "80px "><?php echo oci_result($stid, 'POSITION'); ?>
+            <TD width = "120px "><a id="tip" href="#" onmousemove="movtip(event)">
             <?php
-                $aaid = oci_result($stid, 'ID');
-                $sql1 = "SELECT track.TID, track.POSITION FROM track where track.RCID like '$aaid'";
+                $aaid = oci_result($stid, 'MID');
+                echo $aaid;
+                $sql1 = "SELECT releasemedium.NAME, releasemedium.FORMAT FROM releasemedium where releasemedium.MID like '$aaid'";
                 $stid1 = oci_parse($conn, $sql1);
                 oci_execute($stid1, OCI_DEFAULT);
             ?>
 <span id="tip_info"><?php
     while (oci_fetch($stid1)) {
-        $out = oci_result($stid1, 'TID');
-        $out1 = oci_result($stid1, 'POSITION');
-        echo $out;echo ":"; echo $out1;
+        $out = oci_result($stid1, 'NAME');
+        $out1 = oci_result($stid1, 'FORMAT');
+        echo $out;echo "("; echo $out1; echo")";
+    } ?></span></a>
+
+
+
+</TD>
+<TD width = "120px "><a id="tip" href="#" onmousemove="movtip(event)">
+<?php
+    $aaid = oci_result($stid, 'RCID');
+    echo $aaid;
+    $sql1 = "SELECT recording.NAME, recording.LENGTH FROM recording where recording.ID like '$aaid'";
+    $stid1 = oci_parse($conn, $sql1);
+    oci_execute($stid1, OCI_DEFAULT);
+    ?>
+<span id="tip_info"><?php
+    while (oci_fetch($stid1)) {
+        $out = oci_result($stid1, 'NAME');
+        $out1 = oci_result($stid1, 'LENGTH');
+        echo $out;echo ":"; echo $out1; echo "\n";
+    } ?></span></a>
+
+
+
+</TD>
+<TD width = "80px "><a id="tip" href="#" onmousemove="movtip(event)">A
+<?php
+    $aaid = oci_result($stid, 'TID');
+    $sql1 = "SELECT artist.ID, artist.NAME FROM artist_track, artist where artist_track.TID like '$aaid' and artist.ID = artist_track.AID";
+    $stid1 = oci_parse($conn, $sql1);
+    oci_execute($stid1, OCI_DEFAULT);
+    ?>
+<span id="tip_info"><?php
+    while (oci_fetch($stid1)) {
+        $out = oci_result($stid1, 'ID');
+        $out1 = oci_result($stid1, 'NAME');
+        echo $out1;echo "("; echo $out; echo ")";
     } ?></span></a>
 
 
 
 </TD>
 
+
         </TABLE>
 <?PHP } ?>
 <form action="<?php $_SERVER['PHP_SELF']?>" method="get" name="search_form" target="_self" id="f">
 <TABLE>
+<TD width = "200px" style="color:#C0C0C0">
+<input type="text" name="id" class="kw" size="8" maxlength="100" style="color:#bbb"/>
 <TD width = "80px" style="color:#C0C0C0">
-<input type="text" name="id" class="kw" size="5" maxlength="100" style="color:#bbb"/>
-<TD width = "300px" style="color:#C0C0C0">
-<input type="text" name="name" class="kw" size="12" maxlength="100" style="color:#bbb"/>
-<TD width = "80px" style="color:#C0C0C0">
-<input type="text" name="length" class="kw" size="5" maxlength="100" style="color:#bbb"/>
-</TABLE>
-<input name="submit" type="submit" class="sb" value="keyword search" style="color:#000"/>
+<input type="text" name="position" class="kw" size="5" maxlength="100" style="color:#bbb"/>
 <br />
 
 </form>
@@ -207,7 +197,7 @@ function movtip(e){
     // range of num links to show
     $range = 3;
     
-    $pere = "&id={$id}&name={$name}&length={$length}";
+    $pere = "&id={$id}&position={$position}";
     
     // if not on page 1, don't show back links
     if ($currentpage > 1) {
