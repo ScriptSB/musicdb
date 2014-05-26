@@ -104,7 +104,7 @@
     $sql = "SELECT * from (select ar.*, rownum rm FROM (select *
     from(select recording.name, count(*)as numcount
          from recording recording
-         where recording.id<1000000 and recording.name not like '[%]'
+         where recording.name not like '[%]'
          group by recording.name
          order by count(*) desc)
     where rownum<=5 ) ar ) where rm between $offset and $num";
@@ -124,7 +124,7 @@ Query Q: List the 5 titles that are associated with the most different songs (re
     ?>
         <TABLE>
             <TD width = "200px "><?php echo oci_result($stid, 'NAME'); ?>
-<TD width = "200px "><?php echo oci_result($stid, 'NUMCUNT'); ?>
+<TD width = "200px "><?php echo oci_result($stid, 'NUMCOUNT'); ?>
         </TD>
         </TABLE>
     <?php
