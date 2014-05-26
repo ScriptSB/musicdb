@@ -535,33 +535,38 @@ R
 commentstyle=\color{red!50!green!50!blue!50},
 rulesepcolor=\color{red!20!green!20!blue!20},
 frame=shadowbox]
---join2 is a table with artist id and the
---    number of tracks he has.
---join3 is a table with artist id and the
---    number of releases his track has contributed to.
---join4 simply join the above two tables together
+--artist_count_track is a table with artist id
+--    and the number of tracks he has.
+--artist_count_release is a table with artist id
+--    and the number of releases his track has contributed to.
+--join2 simply join the above two tables together
 --    in order to caculate the ratio in the next step
+
+create view artist_count_track as
+  select artist_track.aid, count(*) as track_count
+    from artist_track artist_track
+    group by artist_track.aid;
+            
+create view artist_count_release as            
+  select join1.aid, count(distinct releasemedium.rid)
+      as release_count
+    from (
+    select artist_track.aid, track.mid
+      from artist_track artist_track, track track
+      where artist_track.tid = track.tid) join1,
+          releasemedium releasemedium
+    where join1.mid = releasemedium.mid
+    group by join1.aid;
+             
 select artist.name
   from (
-  select join2.aid
-  from (
-    select artist_track.aid, count(*) as track_count
-    from artist_track artist_track
-    group by artist_track.aid)join2,(
-      select join1.aid, count(distinct releasemedium.rid)
-          as release_count
-        from (
-        select artist_track.aid, track.mid
-          from artist_track artist_track, track track
-          where artist_track.tid = track.tid) join1,
-              releasemedium releasemedium
-        where join1.mid = releasemedium.mid
-        group by join1.aid)join3
-      where join2.aid = join3.aid
-      order by
-      (join2.track_count/join3.release_count) desc)
-          join4, artist artist
-    where rownum <=10 and artist.id = join4.aid;
+  select count_t.aid
+    from artist_count_track count_t,
+        artist_count_release count_r
+    where count_t.aid = count_r.aid
+    order by (count_t.track_count/count_r.release_count)
+        desc)join2, artist artist
+  where rownum <=10 and artist.id = join2.aid;
 --select the top 10 and get the artist name from artist id
 \end{lstlisting}
 S
@@ -609,16 +614,72 @@ select artist.name, ab.score
 
 \end{lstlisting}
 
+\section{Analyze the Queries}
+
+We've already created 8 indexes:\\
+\begin{lstlisting}[language=SQL, keywordstyle=\color{blue!70},
+commentstyle=\color{red!50!green!50!blue!50},
+rulesepcolor=\color{red!20!green!20!blue!20},
+frame=shadowbox]
+create bitmap index genderindex
+on  artist(gender); 
+
+create bitmap index typeindex
+on artist(type);
+
+create bitmap index areaindex
+on artist(area_name);
+
+create index nameindex
+on artist(name);
+
+create index artrack
+on  artist_track(aid);
+
+create index artracktid
+on  artist_track(tid);
+
+create index genreindex
+on artist_genre(gid);
+
+create index tracktid
+on track(mid);
+\end{lstlisting}
+
+We choosed Query H, Query I and Query J.
+
+\subsection{Query H}
+
+An AID-index is built on TABLE artist\_track because it can speed up the range scan(In the SQL, we used only AID for this TABLE, so it's obvious that we should use this index).\\
+There is a bitmap index built on area\_name for TABLE artist to quickly group the artists by attribute "area\_name". It will take much more time to grasp the number of artists in every area if we don't have this index (there are 264690 areas and 815387 artists, thus may cost about O($10^{10}$) for grouping without area-indexing). \\
+The system also used the bitmap index on gender for TABLE artist, since bitmap indexes are compact and they work best for columns with a small set of values(the attribute "gender" contains only 3 kinds of value: "Male", "Female" and "Other"). Then we can quickly partition artists from areas by gender. \\
+Finally, we succeeded in running the query in \textbf{about 30s}. The join(artist and artist\_track) takes most of time(60\%+ of IO cost) since both contain a large amount of data, and relatively little time with group(by gender and area\_name, about 20\% IO cost) when we use the indexes.\\
+\includegraphics[width=14cm]{costh}
+
+\subsection{Query I}
+The indexes are built on attribute name on for TABLE artist, and indexes of tables of their own. In the plan explaition, we can see that all IO cost by table access is very little thanks to the indexes.\\
+We ran the query in \textbf{539 ms}. The "exists" cost most of the IO cost.\\
+\includegraphics[width=14cm]{costi}
+
+\subsection{Query J}
+The indexes used are gender-index on TABLE artist and gid-index on TABLE genre. For gender-index, we've already discuessed in anlysis for Query H. And for gid-index, it managed to fast-full scan for the "group by gid". Thus, the indexes are important when we do such kind of queries(especially for "GROUP BY").\\
+The query cost \textbf{7270 ms}. 50% of the IO cost is on the "join"(it's foreseeable since it really cost when we need to join the 2 large tables), and another 50% of the IO cost is on the outer "GROUP BY" (since the cardinality is very large). Other part of the query(table access, inner group by and select) cost very little.
+\\
+\includegraphics[width=14cm]{costj}
+
+
 \section{Interface}
 Since we've already upload the data to the server, it's convient for us to use PHP + Apache + Oracle to build the website as interface, like below:\\ \\
 \includegraphics[width=14cm]{interface1}\\ \\
 It's the index of our website. The website contains 4 parts: Home, Data, Query and About, and the functionally page is Data and Query.\\ \\
-The screen shot of Data page is as below, the page shows the data of tables(you can select the table you want to see by clicking the link of table names, which are the yellow words on the uper part of the page). Each page would show 20 data and you can blowse more data by click the link of pages on the bottom part of the page. As the screen shot, it shows the 'artist' table. By moving your mouse onto those foreign keys, a prompt box showing the message of the table linked by the foreign key(as the screen shot, we move the mouse onto the 'areaid' and a box showing message of the name and type of the 'areaid').\\ \\
+The screen shot of Data page is as below, the page shows the data of tables(you can select the table you want to see by clicking the link of table names, which are the yellow words on the uper part of the page). Each page would show 20 data and you can blowse more data by click the link of pages on the bottom part of the page. As the screen shot, it shows the 'artist' table. By moving your mouse onto those foreign keys, a prompt box showing the message of the table linked by the foreign key or relationship(as the screen shot, we move the mouse onto the 'genre' and a box showing message of the genre name and genre id of the artist).\\ \\
 \includegraphics[width=13cm]{interface2}\\ \\
-Under each row there's a input box, and you can use it to search for keyword. Just by clicking the "Keyword Search" you can filter the data of the table. For example, next screen shot shows the result as we input 'Person' under keyword 'atype' and 'male' under keyword 'gender'. \\ \\
+Under each row there's a input box, and you can use it to search for keyword. Just by clicking the "Keyword Search" you can filter the data of the table. For example, next screen shot shows the result as we input 'China' and 'Female' under keyword 'AREA\_NAME' and 'GENDER'. \\ \\
 \includegraphics[width=13cm]{interface3}\\ \\
-And we satisfied all the queries in the Query page, and you can see the results by clicking the query number.\\ \\
-\includegraphics[width=13cm]{interface4}\\ \\
+And in the data\_modify page, we implement the insert and delete of data. Once given paremeters and clicked "run", the SQL ran will be printed and the SQL will be executed. The result is as below. We've already tested and this function is available.\\ \\
+\includegraphics[width=13cm]{interface5}\\ \\
+And we satisfied all the queries(A-S) in the Query page, and you can see the results by clicking the query number.\\ \\
+\includegraphics[width=10cm]{interface4}\\ \\
 }
 
 \end{document}

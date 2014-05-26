@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.10.9)  26 MAY 2014 01:17
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.10.9)  26 MAY 2014 03:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -701,103 +701,149 @@ Overfull \hbox (2.2307pt too wide) in paragraph at lines 512--513
 [][][][][][][][][][][][][][][][][] 
  []
 
-[10] [11] <interface1.png, id=46, 1253.68375pt x 832.10875pt>
+[10] [11]
+Underfull \hbox (badness 10000) in paragraph at lines 619--623
+
+ []
+
+[12] <costh.jpg, id=49, 1151.30125pt x 517.935pt>
+File: costh.jpg Graphic file (type jpg)
+ <use costh.jpg>
+Package pdftex.def Info: costh.jpg used on input line 657.
+(pdftex.def)             Requested size: 398.33858pt x 179.20146pt.
+
+Overfull \hbox (3.33105pt too wide) in paragraph at lines 653--658
+\OT1/cmr/m/n/10.95 Finally, we suc-ceeded in run-ning the query in \OT1/cmr/bx/
+n/10.95 about 30s\OT1/cmr/m/n/10.95 . The join(artist and artist[]track)
+ []
+
+[13] <costi.jpg, id=56, 1154.3125pt x 470.75874pt>
+File: costi.jpg Graphic file (type jpg)
+ <use costi.jpg>
+Package pdftex.def Info: costi.jpg used on input line 662.
+(pdftex.def)             Requested size: 398.33858pt x 162.45503pt.
+
+<costj.jpg, id=57, 1152.305pt x 565.11125pt>
+File: costj.jpg Graphic file (type jpg)
+ <use costj.jpg>
+Package pdftex.def Info: costj.jpg used on input line 668.
+(pdftex.def)             Requested size: 398.33858pt x 195.35161pt.
+ [14 <./costh.jpg> <./costi.jpg>] <interface1.png, id=61, 1253.68375pt x 832.10
+875pt>
 File: interface1.png Graphic file (type png)
 
 <use interface1.png>
-Package pdftex.def Info: interface1.png used on input line 614.
+Package pdftex.def Info: interface1.png used on input line 673.
 (pdftex.def)             Requested size: 398.33858pt x 264.3884pt.
- <interface2.png, id=47, 1250.6725pt x 833.1125pt>
+ <interface2.png, id=62, 1256.695pt x 811.03pt>
 File: interface2.png Graphic file (type png)
 
 <use interface2.png>
-Package pdftex.def Info: interface2.png used on input line 617.
-(pdftex.def)             Requested size: 369.88582pt x 246.38896pt.
- <interface3.png, id=48, 1250.6725pt x 830.10126pt>
+Package pdftex.def Info: interface2.png used on input line 676.
+(pdftex.def)             Requested size: 369.88582pt x 238.70726pt.
+ <interface3.png, id=63, 1253.68375pt x 832.10875pt>
 File: interface3.png Graphic file (type png)
 
 <use interface3.png>
-Package pdftex.def Info: interface3.png used on input line 619.
-(pdftex.def)             Requested size: 369.88582pt x 245.4984pt.
- <interface4.png, id=49, 1252.68pt x 833.1125pt>
+Package pdftex.def Info: interface3.png used on input line 678.
+(pdftex.def)             Requested size: 369.88582pt x 245.50804pt.
+ <interface5.png, id=64, 1252.68pt x 834.11626pt>
+File: interface5.png Graphic file (type png)
+
+<use interface5.png>
+Package pdftex.def Info: interface5.png used on input line 680.
+(pdftex.def)             Requested size: 369.88582pt x 246.29126pt.
+ <interface4.png, id=65, 1255.69125pt x 834.11626pt>
 File: interface4.png Graphic file (type png)
 
 <use interface4.png>
-Package pdftex.def Info: interface4.png used on input line 621.
-(pdftex.def)             Requested size: 369.88582pt x 245.99487pt.
+Package pdftex.def Info: interface4.png used on input line 682.
+(pdftex.def)             Requested size: 284.52756pt x 188.99173pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 613--623
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 613--623
+Underfull \hbox (badness 10000) in paragraph at lines 672--684
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 613--623
+Underfull \hbox (badness 10000) in paragraph at lines 672--684
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 613--623
+Underfull \hbox (badness 10000) in paragraph at lines 672--684
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 613--623
+Underfull \hbox (badness 10000) in paragraph at lines 672--684
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 613--623
+Underfull \hbox (badness 10000) in paragraph at lines 672--684
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 613--623
+Underfull \hbox (badness 10000) in paragraph at lines 672--684
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 613--623
+Underfull \hbox (badness 10000) in paragraph at lines 672--684
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 613--623
+Underfull \hbox (badness 10000) in paragraph at lines 672--684
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 613--623
+Underfull \hbox (badness 10000) in paragraph at lines 672--684
 
  []
 
-[12] [13 <./interface1.png>] [14 <./interface2.png> <./interface3.png>]
-[15 <./interface4.png>] (./report.aux) ) 
+
+Underfull \hbox (badness 10000) in paragraph at lines 672--684
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 672--684
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 672--684
+
+ []
+
+[15 <./costj.jpg> <./interface1.png>] [16 <./interface2.png>] [17 <./interface3
+.png> <./interface5.png>] [18 <./interface4.png>] (./report.aux) ) 
 Here is how much of TeX's memory you used:
- 6635 strings out of 493315
- 94504 string characters out of 6137904
+ 6670 strings out of 493315
+ 95019 string characters out of 6137904
  210452 words of memory out of 5000000
- 9997 multiletter control sequences out of 15000+600000
- 8797 words of font info for 31 fonts, out of 8000000 for 9000
+ 10027 multiletter control sequences out of 15000+600000
+ 10013 words of font info for 35 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
  44i,12n,43p,704b,1953s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2013/texmf-dist/fon
-ts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2013/texmf-dist/font
-s/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2013/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2013/texmf-dist/fonts/ty
-pe1/public/amsfonts/cm/cmr17.pfb></usr/local/texlive/2013/texmf-dist/fonts/type
-1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmss12.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/pu
-blic/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/pub
-lic/amsfonts/cm/cmsy6.pfb>
-Output written on report.pdf (15 pages, 1161959 bytes).
+</usr/local/t
+exlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/te
+xlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/tex
+live/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texli
+ve/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive
+/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/texlive/2
+013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2013
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2013/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmss12.pfb></usr/local/texlive/2013/tex
+mf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2013/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb>
+Output written on report.pdf (18 pages, 1666033 bytes).
 PDF statistics:
- 90 PDF objects out of 1000 (max. 8388607)
- 59 compressed objects within 1 object stream
+ 111 PDF objects out of 1000 (max. 8388607)
+ 71 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 26 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 46 words of extra memory for PDF output out of 10000 (max. 10000000)
 
